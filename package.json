@@ -1,0 +1,23 @@
+{
+  "name": "ovt",
+  "version": "1.0.0",
+  "description": "object validation tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baijijs/ovt.git"
+  },
+  "keywords": [
+    "validation",
+    "tool"
+  ],
+  "author": "Felix Liu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/baijijs/ovt/issues"
+  },
+  "homepage": "https://github.com/baijijs/ovt#readme"
+}
