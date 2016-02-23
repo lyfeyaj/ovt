@@ -4,7 +4,7 @@
   "description": "object validation tool",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "npm run test"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,10 @@
   "bugs": {
     "url": "https://github.com/baijijs/ovt/issues"
   },
-  "homepage": "https://github.com/baijijs/ovt#readme"
+  "homepage": "https://github.com/baijijs/ovt#readme",
+  "dependencies": {
+    "baiji-normalizer": "^1.0.0",
+    "bue": "^1.0.4",
+    "validator": "^5.0.0"
+  }
 }
