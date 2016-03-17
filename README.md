@@ -69,24 +69,12 @@ Normalize => Sanitize => Validate
   ]
 }
 
-ovt.string.required.isEmail.isMongoId.isIp.http(function(ctx, options) {
+调用方法
+ovt.string.required.isEmail.isMongoId.isIp
 
-});
+根据 Schema 校验 Object
+ovt.validate(obj, schema, function(err, modifiedObj) {});
 
-ovt.string().isRequired().isEmail().isMongoId().isLength().isIP().validate(nameOrFunction, args);
-
-ovt.number.isRequired.isInt().max(5).min(3)
-
-ovt.date().isRequired
-
-ovt.boolean().isRequired.isTrue().isFalse()
-
-ovt.object().isPlainObject().validate(function() {}).sanitize(function() {});
-
-isBetweenYesterdayAndTomorrow(function() {
-
-});
-
-ovt.addMethod('object', 'isBetweenYesterdayAndTomorrow', function() {
-
-});
+添加自定义方法
+ovt.addValidator('object', 'isBetweenYesterdayAndTomorrow', function() {});
+ovt.addSanitizer('object', 'isBetweenYesterdayAndTomorrow', function() {});
