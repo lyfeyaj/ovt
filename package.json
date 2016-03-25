@@ -22,7 +22,7 @@
   "homepage": "https://github.com/baijijs/ovt#readme",
   "dependencies": {
     "baiji-normalizer": "^1.0.0",
-    "bue": "^1.0.4",
+    "lodash": "^4.6.1",
     "validator": "^5.0.0"
   }
 }
