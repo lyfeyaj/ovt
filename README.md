@@ -19,7 +19,7 @@ var Ovt = require('ovt');
 var schema = Ovt.object.keys({
     username: Ovt.string.isLength(3, 30).required,
     password: Ovt.string.matches(/^[a-zA-Z0-9]{3,30}$/),
-    access_token: [Ovt.string, Ovt.number],
+    access_token: Ovt.array.items(Ovt.string, Ovt.number),
     birthyear: Ovt.number.isInteger.gt(1900).lt(2013),
     email: Ovt.string.isEmail
 });
