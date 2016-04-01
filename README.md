@@ -1,80 +1,28 @@
-# ovt
-Object Validation Tool
+ovt
+===
+
+Object schema description language and validator for JavaScript objects.
 
 
-Normalize => Sanitize => Validate
+# Introduction
 
-{
-  name: 'Felix Liu',
-  age: 18,
-  sex: 'male',
+Imagine you run facebook and you want visitors to sign up on the website with real names and not something like `l337_p@nda` in the first name field. How would you define the limitations of what can be inputted and validate it against the set rules?
 
-  hobbies: [
-    { name: 'pingpong', startedAt: '1999-01-01' }
-  ],
+This is ovt, ovt allows you to create *blueprints* or *schemas* for JavaScript objects (an object that stores information) to ensure *validation* of key information.
 
-  job: {
-    company: 'Boqii',
-    startedAt: '2015-01-15',
-    title: 'Senior Dev'
-  }
-}
 
-{
-  name: 'hobbies',
-  type: ['object'],
-  validates: [],
-  sanitizes: [],
-  inner: [
+# Example
 
-  ]
-}
+```javascript
+var Ovt = require('ovt');
 
-{
-  name: 'email',
-  type: ['any'],
-  note: '',
-  required: true,
-  description: '',
-  validates: {},
-  sanitizes: {},
-  http: function() {},
-  inner: [
-    {
-      name: 'email',
-      notes: [],
-      required: true,
-      descriptions: [],
-      validates: {},
-      sanitizes: {},
-      http: function() {},
-      inner: [
+var schema = Ovt.object.keys({
+    username: Ovt.string.isLength(3, 30).required,
+    password: Ovt.string.matches(/^[a-zA-Z0-9]{3,30}$/),
+    access_token: [Ovt.string, Ovt.number],
+    birthyear: Ovt.number.isInteger.gt(1900).lt(2013),
+    email: Ovt.string.isEmail
+});
 
-      ]
-    },
-    [
-      {
-        name: 'email',
-        notes: [],
-        required: true,
-        descriptions: [],
-        validates: {},
-        sanitizes: {},
-        http: function() {},
-        inner: [
-
-        ]
-      }
-    ]
-  ]
-}
-
-调用方法
-ovt.string.required.isEmail.isMongoId.isIp
-
-根据 Schema 校验 Object
-ovt.validate(obj, schema, function(err, modifiedObj) {});
-
-添加自定义方法
-ovt.addValidator('object', 'isBetweenYesterdayAndTomorrow', function() {});
-ovt.addSanitizer('object', 'isBetweenYesterdayAndTomorrow', function() {});
+Ovt.validate({ username: 'abc', birthyear: 1994 }, schema, function (err, value) { });  // err === null -> valid
+```
