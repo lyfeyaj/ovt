@@ -4,7 +4,7 @@
   "description": "object validation tool",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -25,5 +25,9 @@
     "moment": "^2.12.0",
     "validator": "^5.0.0",
     "xss": "^0.2.10"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
   }
 }
