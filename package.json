@@ -27,6 +27,7 @@
     "xss": "^0.2.10"
   },
   "devDependencies": {
+    "benchmark": "^2.1.0",
     "chai": "^3.5.0",
     "mocha": "^2.4.5"
   }
