@@ -1,15 +1,13 @@
-ovt
+Ovt
 ===
 
 Object schema description language and validator for JavaScript objects.
-
 
 # Introduction
 
 Imagine you run facebook and you want visitors to sign up on the website with real names and not something like `l337_p@nda` in the first name field. How would you define the limitations of what can be inputted and validate it against the set rules?
 
 This is ovt, ovt allows you to create *blueprints* or *schemas* for JavaScript objects (an object that stores information) to ensure *validation* of key information.
-
 
 # Example
 
