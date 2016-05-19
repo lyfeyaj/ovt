@@ -13,36 +13,36 @@ describe('ObjectType', function() {
     schema = (new ObjectType()).isObject;
   });
 
-  // describe('isObject()', function() {
-  //   it('should validate valid values', function() {
-  //     Helper.validate(schema, [
-  //       [null, false],
-  //       [0, false],
-  //       ['', false],
-  //       [NaN, false],
-  //       [[], true],
-  //       [new Object(), true],
-  //       [{}, true]
-  //     ], { convert: false });
-  //   });
-  // });
-  //
-  // describe('rename()', function() {
-  //   it('should rename old key to new key', function() {
-  //     Helper.validate(schema.rename('name', 'nickname'), [
-  //       [{ name: 'Felix Liu' }, { nickname: 'Felix Liu' }]
-  //     ], { convert: false });
-  //   });
-  //
-  //   it('should rename according to renames', function() {
-  //     Helper.validate(schema.rename({
-  //       name: 'nickname',
-  //       sex: 'gender'
-  //     }), [
-  //       [{ name: 'Felix Liu', sex: 'male' }, { nickname: 'Felix Liu', gender: 'male' }]
-  //     ], { convert: false });
-  //   });
-  // });
+  describe('isObject()', function() {
+    it('should validate valid values', function() {
+      Helper.validate(schema, [
+        [null, false],
+        [0, false],
+        ['', false],
+        [NaN, false],
+        [[], true],
+        [new Object(), true],
+        [{}, true]
+      ], { convert: false });
+    });
+  });
+
+  describe('rename()', function() {
+    it('should rename old key to new key', function() {
+      Helper.validate(schema.rename('name', 'nickname'), [
+        [{ name: 'Felix Liu' }, { nickname: 'Felix Liu' }]
+      ], { convert: false });
+    });
+
+    it('should rename according to renames', function() {
+      Helper.validate(schema.rename({
+        name: 'nickname',
+        sex: 'gender'
+      }), [
+        [{ name: 'Felix Liu', sex: 'male' }, { nickname: 'Felix Liu', gender: 'male' }]
+      ], { convert: false });
+    });
+  });
 
   describe('keys()', function() {
     it('should validate valid values', function() {
@@ -69,24 +69,24 @@ describe('ObjectType', function() {
     });
   });
 
-  // describe('add()', function() {
-  //   it('should validate valid values', function() {
-  //     Helper.validate(
-  //       schema
-  //         .add('name', (new StringType).isString.required.valid('Felix'))
-  //         .add('hobbies', (new ArrayType).isArray.required.items((new StringType).isString.required))
-  //         .add('gender', (new StringType).isString.required.only(['male', 'femaile', 'unknown']))
-  //     ,
-  //       [
-  //         [{ name: 'Jill' }, false],
-  //         [{ name: 'Felix' }, false],
-  //         [{ name: 'Felix', hobbies: [] }, false],
-  //         [{ name: 'Felix', hobbies: ['pingpong'] }, false],
-  //         [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
-  //         [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true]
-  //       ],
-  //       { convert: false }
-  //     );
-  //   });
-  // });
+  describe('add()', function() {
+    it('should validate valid values', function() {
+      Helper.validate(
+        schema
+          .add('name', (new StringType).isString.required.valid('Felix'))
+          .add('hobbies', (new ArrayType).isArray.required.items((new StringType).isString.required))
+          .add('gender', (new StringType).isString.required.only(['male', 'femaile', 'unknown']))
+      ,
+        [
+          [{ name: 'Jill' }, false],
+          [{ name: 'Felix' }, false],
+          [{ name: 'Felix', hobbies: [] }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'] }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true]
+        ],
+        { convert: false }
+      );
+    });
+  });
 });
