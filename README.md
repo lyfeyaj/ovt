@@ -24,3 +24,14 @@ var schema = Ovt.object.keys({
 
 Ovt.validate({ username: 'abc', birthyear: 1994 }, schema, function (err, value) { });  // err === null -> valid
 ```
+
+# TODO
+
+1. Schema `concat`
+2. Schema `alternative`
+3. Better api for object type
+4. Better error message and i18n
+5. Documentation
+6. Performance
+7. Baiji support
+8. More test cases
