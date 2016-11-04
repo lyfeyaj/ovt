@@ -22,4 +22,17 @@ describe('StringType', function() {
       ], { convert: false });
     });
   });
+
+  describe('required()', function() {
+    it('should validate valid values', function() {
+      Helper.validate(schema.required, [
+        [null, false],
+        [0, false],
+        [undefined, false],
+        [new String(), false],
+        ['', false],
+        ['a', true]
+      ], { convert: false });
+    });
+  });
 });
