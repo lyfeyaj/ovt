@@ -7,7 +7,7 @@ describe('BooleanType', function() {
   let schema;
 
   beforeEach(function() {
-    schema = (new BooleanType()).required.isBoolean;
+    schema = (new BooleanType()).required().isBoolean();
   });
 
   describe('isBoolean()', function() {

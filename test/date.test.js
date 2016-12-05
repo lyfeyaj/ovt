@@ -7,7 +7,7 @@ describe('DateType', function() {
   let schema;
 
   beforeEach(function() {
-    schema = (new DateType()).isDate;
+    schema = (new DateType()).isDate();
   });
 
   describe('isDate()', function() {

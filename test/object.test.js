@@ -10,7 +10,7 @@ describe('ObjectType', function() {
   let schema;
 
   beforeEach(function() {
-    schema = (new ObjectType()).isObject;
+    schema = (new ObjectType()).isObject();
   });
 
   describe('isObject()', function() {
@@ -47,10 +47,10 @@ describe('ObjectType', function() {
   describe('keys()', function() {
     it('should validate valid values', function() {
       let newSchema = schema.keys({
-        name: (new StringType).isString.required.valid('Felix'),
-        hobbies: (new ArrayType).isArray.required.items((new StringType).isString.required)
+        name: (new StringType).isString().required().valid('Felix'),
+        hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required())
       }).keys({
-        gender: (new StringType).isString.required.only(['male', 'femaile', 'unknown'])
+        gender: (new StringType).isString().required().only(['male', 'femaile', 'unknown'])
       });
       Helper.validate(newSchema, [
         [{ name: 'Jill' }, false],
@@ -62,7 +62,7 @@ describe('ObjectType', function() {
       ], { convert: false });
 
       newSchema.keys({
-        nickname: (new StringType).isString.required.valid('my nick name')
+        nickname: (new StringType).isString().required().valid('my nick name')
       });
 
       expect(newSchema._inner.children).not.to.have.property('nickname');
@@ -73,9 +73,9 @@ describe('ObjectType', function() {
     it('should validate valid values', function() {
       Helper.validate(
         schema
-          .add('name', (new StringType).isString.required.valid('Felix'))
-          .add('hobbies', (new ArrayType).isArray.required.items((new StringType).isString.required))
-          .add('gender', (new StringType).isString.required.only(['male', 'femaile', 'unknown']))
+          .add('name', (new StringType).isString().required().valid('Felix'))
+          .add('hobbies', (new ArrayType).isArray().required().items((new StringType).isString().required()))
+          .add('gender', (new StringType).isString().required().only(['male', 'femaile', 'unknown']))
       ,
         [
           [{ name: 'Jill' }, false],

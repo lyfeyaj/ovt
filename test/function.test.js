@@ -7,7 +7,7 @@ describe('FunctionType', function() {
   let schema;
 
   beforeEach(function() {
-    schema = (new FunctionType()).isFunction;
+    schema = (new FunctionType()).isFunction();
   });
 
   describe('isFunction()', function() {

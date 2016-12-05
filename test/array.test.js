@@ -9,13 +9,13 @@ describe('ArrayType', function() {
   let anySchema;
 
   beforeEach(function() {
-    schema = (new ArrayType()).isArray;
+    schema = (new ArrayType()).isArray();
     anySchema = new AnyType();
   });
 
   describe('required()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.required, [
+      Helper.validate(schema.required(), [
         [undefined, false],
         [null, false],
         [1, false],
@@ -23,7 +23,7 @@ describe('ArrayType', function() {
         [new Array, true]
       ], { convert: false });
 
-      Helper.validate(schema.required, [
+      Helper.validate(schema.required(), [
         [undefined, false],
         [null, true],
         [1, true],
@@ -78,10 +78,10 @@ describe('ArrayType', function() {
   describe('items()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema.items(
-        anySchema.required.valid(1),
-        anySchema.required.valid(2),
-        anySchema.forbidden.valid(3),
-        anySchema.optional
+        anySchema.required().valid(1),
+        anySchema.required().valid(2),
+        anySchema.forbidden().valid(3),
+        anySchema.optional()
       ), [
         [[1, 2], true],
         [[1, 2, 3], false],
@@ -96,9 +96,9 @@ describe('ArrayType', function() {
   describe('items()', function() {
     it('should validate required valid values', function() {
       Helper.validate(schema.items(
-        anySchema.required.valid(1),
-        anySchema.required.valid(2),
-        anySchema.optional
+        anySchema.required().valid(1),
+        anySchema.required().valid(2),
+        anySchema.optional()
       ), [
         [[1, 2], true],
         [[1], false],
@@ -109,9 +109,9 @@ describe('ArrayType', function() {
 
     it('should validate forbidden values', function() {
       Helper.validate(schema.items(
-        anySchema.forbidden.valid(1),
-        anySchema.forbidden.valid(2),
-        anySchema.optional
+        anySchema.forbidden().valid(1),
+        anySchema.forbidden().valid(2),
+        anySchema.optional()
       ), [
         [[1, 2], false],
         [[1], false],
@@ -122,10 +122,10 @@ describe('ArrayType', function() {
 
     it('should validate both required and forbidden values', function() {
       Helper.validate(schema.items(
-        anySchema.required.valid(1),
-        anySchema.required.valid(2),
-        anySchema.forbidden.valid(3),
-        anySchema.optional
+        anySchema.required().valid(1),
+        anySchema.required().valid(2),
+        anySchema.forbidden().valid(3),
+        anySchema.optional()
       ), [
         [[1, 2], true],
         [[1, 2, 3], false],
@@ -141,9 +141,9 @@ describe('ArrayType', function() {
   describe('elements()', function() {
     it('should validate required valid values', function() {
       Helper.validate(schema.elements(
-        anySchema.required.valid(1),
-        anySchema.required.valid(2),
-        anySchema.optional
+        anySchema.required().valid(1),
+        anySchema.required().valid(2),
+        anySchema.optional()
       ), [
         [[1, 2], true],
         [[1], false],
@@ -154,9 +154,9 @@ describe('ArrayType', function() {
 
     it('should validate forbidden values', function() {
       Helper.validate(schema.elements(
-        anySchema.forbidden.valid(1),
-        anySchema.forbidden.valid(2),
-        anySchema.optional
+        anySchema.forbidden().valid(1),
+        anySchema.forbidden().valid(2),
+        anySchema.optional()
       ), [
         [[1, 2], false],
         [[1], false],
@@ -167,10 +167,10 @@ describe('ArrayType', function() {
 
     it('should validate both required and forbidden values', function() {
       Helper.validate(schema.elements(
-        anySchema.required.valid(1),
-        anySchema.required.valid(2),
-        anySchema.forbidden.valid(3),
-        anySchema.optional
+        anySchema.required().valid(1),
+        anySchema.required().valid(2),
+        anySchema.forbidden().valid(3),
+        anySchema.optional()
       ), [
         [[1, 2], true],
         [[1, 2, 3], false],
@@ -186,10 +186,10 @@ describe('ArrayType', function() {
   describe('ordered()', function() {
     it('should validate required valid values in order', function() {
       Helper.validate(schema.ordered(
-        anySchema.required.valid(1),
-        anySchema.required.valid(2),
-        anySchema.valid(3).forbidden,
-        anySchema.optional
+        anySchema.required().valid(1),
+        anySchema.required().valid(2),
+        anySchema.valid(3).forbidden(),
+        anySchema.optional()
       ), [
         [[1, 2], true],
         [[1, 2, 4, 3], true],

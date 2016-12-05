@@ -7,7 +7,7 @@ describe('RegExpType', function() {
   let schema;
 
   beforeEach(function() {
-    schema = (new RegExpType()).isRegExp;
+    schema = (new RegExpType()).isRegExp();
   });
 
   describe('isRegExp()', function() {

@@ -12,7 +12,7 @@ describe('AnyType', function() {
 
   describe('required()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.required, [
+      Helper.validate(schema.required(), [
         [undefined, false],
         [null, true],
         [1, true]
@@ -22,7 +22,7 @@ describe('AnyType', function() {
 
   describe('optional()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.optional, [
+      Helper.validate(schema.optional(), [
         [undefined, true],
         [null, true],
         [1, true]
@@ -32,7 +32,7 @@ describe('AnyType', function() {
 
   describe('forbidden()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.forbidden, [
+      Helper.validate(schema.forbidden(), [
         [undefined, true],
         [null, false],
         [1, false]

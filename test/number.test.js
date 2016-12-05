@@ -7,7 +7,7 @@ describe('NumberType', function() {
   let schema;
 
   beforeEach(function() {
-    schema = (new NumberType()).isNumber;
+    schema = (new NumberType()).isNumber();
   });
 
   describe('isNumber()', function() {

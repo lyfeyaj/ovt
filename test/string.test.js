@@ -7,7 +7,7 @@ describe('StringType', function() {
   let schema;
 
   beforeEach(function() {
-    schema = (new StringType()).isString;
+    schema = (new StringType()).isString();
   });
 
   describe('isString()', function() {
@@ -25,7 +25,7 @@ describe('StringType', function() {
 
   describe('required()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.required, [
+      Helper.validate(schema.required(), [
         [null, false],
         [0, false],
         [undefined, false],

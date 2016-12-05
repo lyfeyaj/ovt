@@ -7,7 +7,7 @@ describe('BufferType', function() {
   let schema;
 
   beforeEach(function() {
-    schema = (new BufferType()).isBuffer;
+    schema = (new BufferType()).isBuffer();
   });
 
   describe('isBuffer()', function() {
