@@ -95,6 +95,24 @@ describe('ArrayType', function() {
     });
   });
 
+  describe('constructor()', function() {
+    it('should validate valid values', function() {
+      helpers.validate(new ArrayType(
+        anySchema.required().valid(1),
+        anySchema.required().valid(2),
+        anySchema.forbidden().valid(3),
+        anySchema.optional()
+      ), [
+        [[1, 2], true],
+        [[1, 2, 3], false],
+        [[1], false],
+        [[2], false],
+        [[3], false],
+        [[1,2,4], true]
+      ]);
+    });
+  });
+
   describe('items()', function() {
     it('should validate required valid values', function() {
       helpers.validate(schema.items(

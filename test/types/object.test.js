@@ -46,6 +46,19 @@ describe('ObjectType', function() {
     });
   });
 
+  let testCases = [
+    [{ name: 'Jill' }, false],
+    [{ name: 'Felix' }, false],
+    [{ name: 'Felix', hobbies: [] }, false],
+    [{ name: 'Felix', hobbies: ['pingpong'] }, false],
+    [{ hobbies: ['pingpong'], gender: 'male' }, false],
+    [{ name: 'Felix', gender: 'male' }, false],
+    [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
+    [{ name: 'Jill', hobbies: ['pingpong'], gender: 'male' }, false],
+    [{ name: 'Felix', hobbies: [1], gender: 'male' }, false],
+    [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true]
+  ];
+
   describe('keys()', function() {
     it('should validate valid values', function() {
       let newSchema = schema.keys({
@@ -53,15 +66,30 @@ describe('ObjectType', function() {
         hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required())
       }).keys({
         gender: (new StringType).isString().required().only(['male', 'femaile', 'unknown'])
+      }).keys({
+        languages: [new StringType],
+        children: { name: new StringType }
       });
-      helpers.validate(newSchema, [
-        [{ name: 'Jill' }, false],
-        [{ name: 'Felix' }, false],
-        [{ name: 'Felix', hobbies: [] }, false],
-        [{ name: 'Felix', hobbies: ['pingpong'] }, false],
-        [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
-        [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true]
-      ], { convert: false });
+      helpers.validate(newSchema, testCases, { convert: false });
+
+      newSchema.keys({
+        nickname: (new StringType).isString().required().valid('my nick name')
+      });
+
+      expect(newSchema._inner.children).not.to.have.property('nickname');
+    });
+  });
+
+  describe('constructor()', function() {
+    it('should validate valid values', function() {
+      let newSchema = new ObjectType({
+        name: (new StringType).isString().required().valid('Felix'),
+        hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required()),
+        gender: (new StringType).isString().required().only(['male', 'femaile', 'unknown']),
+        languages: [new StringType],
+        children: { name: new StringType }
+      });
+      helpers.validate(newSchema, testCases, { convert: false });
 
       newSchema.keys({
         nickname: (new StringType).isString().required().valid('my nick name')
