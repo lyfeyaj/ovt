@@ -1,7 +1,7 @@
 'use strict';
 
-const Helper = require('./helpers');
-const DateType = require('../lib/types/date');
+const helpers = require('../helpers');
+const DateType = require('../../lib/types/date');
 
 describe('DateType', function() {
   let schema;
@@ -10,11 +10,11 @@ describe('DateType', function() {
     schema = (new DateType()).isDate();
   });
 
-  Helper.inheritsAnyTypeBy(DateType);
+  helpers.inheritsAnyTypeBy(DateType);
 
   describe('isDate()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema, [
+      helpers.validate(schema, [
         [null, false],
         [0, false],
         [[], false],

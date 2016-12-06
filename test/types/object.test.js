@@ -1,10 +1,10 @@
 'use strict';
 
 const expect = require('chai').expect;
-const Helper = require('./helpers');
-const ObjectType = require('../lib/types/object');
-const ArrayType = require('../lib/types/array');
-const StringType = require('../lib/types/string');
+const helpers = require('../helpers');
+const ObjectType = require('../../lib/types/object');
+const ArrayType = require('../../lib/types/array');
+const StringType = require('../../lib/types/string');
 
 describe('ObjectType', function() {
   let schema;
@@ -13,11 +13,11 @@ describe('ObjectType', function() {
     schema = (new ObjectType()).isObject();
   });
 
-  Helper.inheritsAnyTypeBy(ObjectType);
+  helpers.inheritsAnyTypeBy(ObjectType);
 
   describe('isObject()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema, [
+      helpers.validate(schema, [
         [null, false],
         [0, false],
         ['', false],
@@ -31,13 +31,13 @@ describe('ObjectType', function() {
 
   describe('rename()', function() {
     it('should rename old key to new key', function() {
-      Helper.validate(schema.rename('name', 'nickname'), [
+      helpers.validate(schema.rename('name', 'nickname'), [
         [{ name: 'Felix Liu' }, { nickname: 'Felix Liu' }]
       ], { convert: false });
     });
 
     it('should rename according to renames', function() {
-      Helper.validate(schema.rename({
+      helpers.validate(schema.rename({
         name: 'nickname',
         sex: 'gender'
       }), [
@@ -54,7 +54,7 @@ describe('ObjectType', function() {
       }).keys({
         gender: (new StringType).isString().required().only(['male', 'femaile', 'unknown'])
       });
-      Helper.validate(newSchema, [
+      helpers.validate(newSchema, [
         [{ name: 'Jill' }, false],
         [{ name: 'Felix' }, false],
         [{ name: 'Felix', hobbies: [] }, false],
@@ -73,7 +73,7 @@ describe('ObjectType', function() {
 
   describe('add()', function() {
     it('should validate valid values', function() {
-      Helper.validate(
+      helpers.validate(
         schema
           .add('name', (new StringType).isString().required().valid('Felix'))
           .add('hobbies', (new ArrayType).isArray().required().items((new StringType).isString().required()))

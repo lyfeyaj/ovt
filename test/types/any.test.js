@@ -1,7 +1,7 @@
 'use strict';
 
-const Helper = require('./helpers');
-const AnyType = require('../lib/types/any');
+const helpers = require('../helpers');
+const AnyType = require('../../lib/types/any');
 
 describe('AnyType', function() {
   let schema;
@@ -12,7 +12,7 @@ describe('AnyType', function() {
 
   describe('required()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.required(), [
+      helpers.validate(schema.required(), [
         [undefined, false],
         [null, true],
         [1, true]
@@ -22,7 +22,7 @@ describe('AnyType', function() {
 
   describe('optional()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.optional(), [
+      helpers.validate(schema.optional(), [
         [undefined, true],
         [null, true],
         [1, true]
@@ -32,7 +32,7 @@ describe('AnyType', function() {
 
   describe('forbidden()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.forbidden(), [
+      helpers.validate(schema.forbidden(), [
         [undefined, true],
         [null, false],
         [1, false]
@@ -42,7 +42,7 @@ describe('AnyType', function() {
 
   describe('valid()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.valid(1, 3), [
+      helpers.validate(schema.valid(1, 3), [
         [1, true],
         [3, true],
         [2, false]
@@ -52,7 +52,7 @@ describe('AnyType', function() {
 
   describe('only()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.only(1, 3), [
+      helpers.validate(schema.only(1, 3), [
         [1, true],
         [3, true],
         [2, false]
@@ -62,7 +62,7 @@ describe('AnyType', function() {
 
   describe('whitelist()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.whitelist(1, 3), [
+      helpers.validate(schema.whitelist(1, 3), [
         [1, true],
         [3, true],
         [2, false]
@@ -72,7 +72,7 @@ describe('AnyType', function() {
 
   describe('oneOf()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.oneOf(1, 3), [
+      helpers.validate(schema.oneOf(1, 3), [
         [1, true],
         [3, true],
         [2, false]
@@ -82,7 +82,7 @@ describe('AnyType', function() {
 
   describe('equals()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.equals(1), [
+      helpers.validate(schema.equals(1), [
         [1, true],
         [2, false]
       ]);
@@ -91,7 +91,7 @@ describe('AnyType', function() {
 
   describe('eq()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.eq(1), [
+      helpers.validate(schema.eq(1), [
         [1, true],
         [2, false]
       ]);
@@ -100,7 +100,7 @@ describe('AnyType', function() {
 
   describe('equal()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.equal(1), [
+      helpers.validate(schema.equal(1), [
         [1, true],
         [2, false]
       ]);
@@ -109,7 +109,7 @@ describe('AnyType', function() {
 
   describe('invalid()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.invalid(1, 2), [
+      helpers.validate(schema.invalid(1, 2), [
         [1, false],
         [2, false],
         [3, true],
@@ -120,7 +120,7 @@ describe('AnyType', function() {
 
   describe('not()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.not(1, 2), [
+      helpers.validate(schema.not(1, 2), [
         [1, false],
         [2, false],
         [3, true],
@@ -131,7 +131,7 @@ describe('AnyType', function() {
 
   describe('disallow()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.disallow(1, 2), [
+      helpers.validate(schema.disallow(1, 2), [
         [1, false],
         [2, false],
         [3, true],
@@ -142,7 +142,7 @@ describe('AnyType', function() {
 
   describe('blacklist()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.blacklist(1, 2), [
+      helpers.validate(schema.blacklist(1, 2), [
         [1, false],
         [2, false],
         [3, true],

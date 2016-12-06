@@ -1,7 +1,7 @@
 'use strict';
 
-const Helper = require('./helpers');
-const StringType = require('../lib/types/string');
+const helpers = require('../helpers');
+const StringType = require('../../lib/types/string');
 
 describe('StringType', function() {
   let schema;
@@ -10,11 +10,11 @@ describe('StringType', function() {
     schema = (new StringType()).isString();
   });
 
-  Helper.inheritsAnyTypeBy(StringType);
+  helpers.inheritsAnyTypeBy(StringType);
 
   describe('isString()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema, [
+      helpers.validate(schema, [
         [null, false],
         [0, false],
         [{}, false],
@@ -27,7 +27,7 @@ describe('StringType', function() {
 
   describe('required()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema.required(), [
+      helpers.validate(schema.required(), [
         [null, false],
         [0, false],
         [undefined, false],

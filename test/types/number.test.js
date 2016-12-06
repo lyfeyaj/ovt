@@ -1,7 +1,7 @@
 'use strict';
 
-const Helper = require('./helpers');
-const NumberType = require('../lib/types/number');
+const helpers = require('../helpers');
+const NumberType = require('../../lib/types/number');
 
 describe('NumberType', function() {
   let schema;
@@ -10,11 +10,11 @@ describe('NumberType', function() {
     schema = (new NumberType()).isNumber();
   });
 
-  Helper.inheritsAnyTypeBy(NumberType);
+  helpers.inheritsAnyTypeBy(NumberType);
 
   describe('isNumber()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema, [
+      helpers.validate(schema, [
         [null, false],
         [0, true],
         [-1, true],

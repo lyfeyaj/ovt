@@ -1,7 +1,7 @@
 'use strict';
 
-const Helper = require('./helpers');
-const BooleanType = require('../lib/types/boolean');
+const helpers = require('../helpers');
+const BooleanType = require('../../lib/types/boolean');
 
 describe('BooleanType', function() {
   let schema;
@@ -10,11 +10,11 @@ describe('BooleanType', function() {
     schema = (new BooleanType()).required().isBoolean();
   });
 
-  Helper.inheritsAnyTypeBy(BooleanType);
+  helpers.inheritsAnyTypeBy(BooleanType);
 
   describe('isBoolean()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema, [
+      helpers.validate(schema, [
         [undefined, false],
         [null, false],
         [0, false],

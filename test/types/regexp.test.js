@@ -1,7 +1,7 @@
 'use strict';
 
-const Helper = require('./helpers');
-const RegExpType = require('../lib/types/regexp');
+const helpers = require('../helpers');
+const RegExpType = require('../../lib/types/regexp');
 
 describe('RegExpType', function() {
   let schema;
@@ -10,11 +10,11 @@ describe('RegExpType', function() {
     schema = (new RegExpType()).isRegExp();
   });
 
-  Helper.inheritsAnyTypeBy(RegExpType);
+  helpers.inheritsAnyTypeBy(RegExpType);
 
   describe('isRegExp()', function() {
     it('should validate valid values', function() {
-      Helper.validate(schema, [
+      helpers.validate(schema, [
         [null, false],
         [0, false],
         [{}, false],
