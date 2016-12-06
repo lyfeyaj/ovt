@@ -95,9 +95,9 @@ describe('ArrayType', function() {
     });
   });
 
-  describe('constructor()', function() {
+  describe('initialize()', function() {
     it('should validate valid values', function() {
-      helpers.validate(new ArrayType(
+      helpers.validate(new ArrayType().initialize(
         anySchema.required().valid(1),
         anySchema.required().valid(2),
         anySchema.forbidden().valid(3),

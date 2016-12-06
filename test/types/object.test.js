@@ -80,9 +80,9 @@ describe('ObjectType', function() {
     });
   });
 
-  describe('constructor()', function() {
+  describe('initialize()', function() {
     it('should validate valid values', function() {
-      let newSchema = new ObjectType({
+      let newSchema = new ObjectType().initialize({
         name: (new StringType).isString().required().valid('Felix'),
         hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required()),
         gender: (new StringType).isString().required().only(['male', 'femaile', 'unknown']),
