@@ -13,6 +13,8 @@ describe('ArrayType', function() {
     anySchema = new AnyType();
   });
 
+  Helper.inheritsAnyTypeBy(ArrayType);
+
   describe('required()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema.required(), [

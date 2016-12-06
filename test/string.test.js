@@ -10,6 +10,8 @@ describe('StringType', function() {
     schema = (new StringType()).isString();
   });
 
+  Helper.inheritsAnyTypeBy(StringType);
+
   describe('isString()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema, [

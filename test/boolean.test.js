@@ -10,6 +10,8 @@ describe('BooleanType', function() {
     schema = (new BooleanType()).required().isBoolean();
   });
 
+  Helper.inheritsAnyTypeBy(BooleanType);
+
   describe('isBoolean()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema, [

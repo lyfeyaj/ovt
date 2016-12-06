@@ -10,6 +10,8 @@ describe('FunctionType', function() {
     schema = (new FunctionType()).isFunction();
   });
 
+  Helper.inheritsAnyTypeBy(FunctionType);
+
   describe('isFunction()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema, [

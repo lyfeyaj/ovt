@@ -10,6 +10,8 @@ describe('NumberType', function() {
     schema = (new NumberType()).isNumber();
   });
 
+  Helper.inheritsAnyTypeBy(NumberType);
+
   describe('isNumber()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema, [

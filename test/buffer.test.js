@@ -10,6 +10,8 @@ describe('BufferType', function() {
     schema = (new BufferType()).isBuffer();
   });
 
+  Helper.inheritsAnyTypeBy(BufferType);
+
   describe('isBuffer()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema, [

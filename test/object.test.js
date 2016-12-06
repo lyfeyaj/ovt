@@ -13,6 +13,8 @@ describe('ObjectType', function() {
     schema = (new ObjectType()).isObject();
   });
 
+  Helper.inheritsAnyTypeBy(ObjectType);
+
   describe('isObject()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema, [

@@ -10,6 +10,8 @@ describe('RegExpType', function() {
     schema = (new RegExpType()).isRegExp();
   });
 
+  Helper.inheritsAnyTypeBy(RegExpType);
+
   describe('isRegExp()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema, [

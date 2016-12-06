@@ -10,6 +10,8 @@ describe('DateType', function() {
     schema = (new DateType()).isDate();
   });
 
+  Helper.inheritsAnyTypeBy(DateType);
+
   describe('isDate()', function() {
     it('should validate valid values', function() {
       Helper.validate(schema, [
