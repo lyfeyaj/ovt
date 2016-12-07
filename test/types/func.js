@@ -1,16 +1,16 @@
 'use strict';
 
 const helpers = require('../helpers');
-const FunctionType = require('../../lib/types/function');
+const FuncType = require('../../lib/types/func');
 
-describe('FunctionType', function() {
+describe('FuncType', function() {
   let schema;
 
   beforeEach(function() {
-    schema = (new FunctionType()).isFunction();
+    schema = (new FuncType()).isFunction();
   });
 
-  helpers.inheritsAnyTypeBy(FunctionType);
+  helpers.inheritsAnyTypeBy(FuncType);
 
   describe('isFunction()', function() {
     it('should validate valid values', function() {
