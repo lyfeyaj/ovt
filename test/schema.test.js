@@ -24,21 +24,7 @@ describe('Schema', function() {
 
   describe('validate()', function() {
     it('should add custom validators', function() {
-      expect(
-        schema
-          .validate(function() {})
-          .validate(function() {})
-      ).to.have.deep.property('_methods._customValidators').have.length(2);
-    });
-  });
-
-  describe('sanitize()', function() {
-    it('should add custom validators', function() {
-      expect(
-        schema
-          .sanitize(function() {})
-          .sanitize(function() {})
-      ).to.have.deep.property('_methods._customSanitizers').have.length(2);
+      expect(schema.validate(1)).to.have.property('value', 1);
     });
   });
 
