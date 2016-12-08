@@ -44,6 +44,15 @@ describe('ArrayType', function() {
     });
   });
 
+  describe('length()', function() {
+    it('should validate valid values', function() {
+      helpers.validate(schema.length(2), [
+        [new Array(3), false],
+        [new Array(2), true]
+      ]);
+    });
+  });
+
   describe('maxLength()', function() {
     it('should validate valid values', function() {
       helpers.validate(schema.maxLength(2), [
@@ -55,9 +64,31 @@ describe('ArrayType', function() {
     });
   });
 
+  describe('max()', function() {
+    it('should validate valid values', function() {
+      helpers.validate(schema.max(2), [
+        [new Array(3), false],
+        [new Array(2), true],
+        [new Array(1), true],
+        [new Array(), true]
+      ]);
+    });
+  });
+
   describe('minLength()', function() {
     it('should validate valid values', function() {
       helpers.validate(schema.minLength(2), [
+        [new Array(3), true],
+        [new Array(2), true],
+        [new Array(1), false],
+        [new Array(), false]
+      ]);
+    });
+  });
+
+  describe('min()', function() {
+    it('should validate valid values', function() {
+      helpers.validate(schema.min(2), [
         [new Array(3), true],
         [new Array(2), true],
         [new Array(1), false],
