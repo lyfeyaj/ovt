@@ -1,5 +1,6 @@
 'use strict';
 
+const expect = require('chai').expect;
 const helpers = require('../helpers');
 const StringType = require('../../lib/types/string');
 
@@ -11,6 +12,17 @@ describe('StringType', function() {
   });
 
   helpers.inheritsAnyTypeBy(StringType);
+
+  describe('convert()', function() {
+    it('should convert the value to string', function() {
+      expect(schema.convert(1)).to.eq('1');
+      expect(schema.convert('')).to.eq('');
+      expect(schema.convert(null)).to.eq('null');
+      expect(schema.convert({})).to.eq('[object Object]');
+      expect(schema.convert([1])).to.eq('1');
+      expect(schema.convert(undefined)).to.eq('undefined');
+    });
+  });
 
   describe('isString()', function() {
     it('should validate valid values', function() {

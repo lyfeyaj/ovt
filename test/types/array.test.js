@@ -1,5 +1,6 @@
 'use strict';
 
+const expect = require('chai').expect;
 const helpers = require('../helpers');
 const ArrayType = require('../../lib/types/array');
 const AnyType = require('../../lib/types/any');
@@ -14,6 +15,17 @@ describe('ArrayType', function() {
   });
 
   helpers.inheritsAnyTypeBy(ArrayType);
+
+  describe('convert()', function() {
+    it('should convert the value to array', function() {
+      expect(schema.convert(1)).to.deep.eq([1]);
+      expect(schema.convert('')).to.deep.eq(['']);
+      expect(schema.convert(null)).to.deep.eq([null]);
+      expect(schema.convert({})).to.deep.eq([{}]);
+      expect(schema.convert([1])).to.deep.eq([1]);
+      expect(schema.convert(undefined)).to.deep.eq([]);
+    });
+  });
 
   describe('required()', function() {
     it('should validate valid values', function() {

@@ -1,5 +1,6 @@
 'use strict';
 
+const expect = require('chai').expect;
 const helpers = require('../helpers');
 const NumberType = require('../../lib/types/number');
 
@@ -11,6 +12,19 @@ describe('NumberType', function() {
   });
 
   helpers.inheritsAnyTypeBy(NumberType);
+
+  describe('convert()', function() {
+    it('should convert the value to number', function() {
+      expect(schema.convert(1)).to.eq(1);
+      expect(schema.convert('')).to.eq(0);
+      expect(schema.convert(null)).to.eq(0);
+      expect(schema.convert(true)).to.eq(1);
+      expect(schema.convert(false)).to.eq(0);
+      expect(schema.convert({})).to.be.nan;
+      expect(schema.convert([1])).to.be.nan;
+      expect(schema.convert(undefined)).to.be.nan;
+    });
+  });
 
   describe('isNumber()', function() {
     it('should validate valid values', function() {

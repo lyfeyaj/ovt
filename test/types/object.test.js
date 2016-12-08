@@ -29,6 +29,18 @@ describe('ObjectType', function() {
     });
   });
 
+  describe('convert()', function() {
+    it('should convert the value to object', function() {
+      expect(schema.convert(1)).to.deep.eq({});
+      expect(schema.convert('')).to.deep.eq({});
+      expect(schema.convert(null)).to.deep.eq({});
+      expect(schema.convert(undefined)).to.deep.eq({});
+      expect(schema.convert(true)).to.deep.eq({});
+      expect(schema.convert(false)).to.deep.eq({});
+      expect(schema.convert([])).to.deep.eq([]);
+    });
+  });
+
   describe('rename()', function() {
     it('should rename old key to new key', function() {
       helpers.validate(schema.rename('name', 'nickname'), [

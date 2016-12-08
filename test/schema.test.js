@@ -10,6 +10,16 @@ describe('Schema', function() {
     schema = new Schema();
   });
 
+  describe('convert()', function() {
+    it('should return the same value as passed', function() {
+      expect(schema.convert(1)).to.eq(1);
+      expect(schema.convert('')).to.eq('');
+      expect(schema.convert(null)).to.eq(null);
+      expect(schema.convert({})).to.deep.eq({});
+      expect(schema.convert([1])).to.deep.eq([1]);
+    });
+  });
+
   describe('clone()', function() {
     it('should return a new object instead the original one', function() {
       schema._defaultValidator = '';

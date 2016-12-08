@@ -1,5 +1,6 @@
 'use strict';
 
+const expect = require('chai').expect;
 const helpers = require('../helpers');
 const FuncType = require('../../lib/types/func');
 
@@ -11,6 +12,16 @@ describe('FuncType', function() {
   });
 
   helpers.inheritsAnyTypeBy(FuncType);
+
+  describe('convert()', function() {
+    it('should convert the value to function', function() {
+      expect(schema.convert('2016-01-01')).to.be.function;
+      expect(schema.convert(function() {})).to.be.function;
+      expect(function() {
+        schema.convert({});
+      }).to.throw(Error);
+    });
+  });
 
   describe('isFunction()', function() {
     it('should validate valid values', function() {
