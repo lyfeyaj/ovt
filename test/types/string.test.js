@@ -1,7 +1,6 @@
 'use strict';
 
 const helpers = require('../helpers');
-const AnyType = require('../../lib/types/any');
 const StringType = require('../../lib/types/string');
 
 describe('StringType', function() {
@@ -49,7 +48,7 @@ describe('StringType', function() {
         ['a', true]
       ], { convert: false });
 
-      let empty = (new StringType).isString().valid('', new String);
+      let empty = (new StringType).valid('', new String);
       helpers.validate(schema.required().empty(empty), [
         [null, false],
         [0, false],
