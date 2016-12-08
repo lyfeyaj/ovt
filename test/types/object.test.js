@@ -108,11 +108,17 @@ describe('ObjectType', function() {
           .add('gender', (new StringType).isString().required().only(['male', 'femaile', 'unknown']))
       ,
         [
+          [null, false],
+          [{}, false],
           [{ name: 'Jill' }, false],
           [{ name: 'Felix' }, false],
+          [{ hobbies: ['pingpong'] }, false],
           [{ name: 'Felix', hobbies: [] }, false],
           [{ name: 'Felix', hobbies: ['pingpong'] }, false],
+          [{ hobbies: ['pingpong'], gender: 'boy' }, false],
           [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: [], gender: 'boy' }, false],
+          [{ name: 'Felix', gender: 'boy' }, false],
           [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true]
         ],
         { convert: false }
