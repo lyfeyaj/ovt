@@ -9,15 +9,15 @@ describe('AlternatesType', function() {
 
   helpers.inheritsAnyTypeBy(AlternatesType);
 
-  describe('try()', function() {
-    it ('should pass if one schema is passed', function() {
-      let any1 = (new AnyType).required().valid(1, 2);
-      let any2 = (new AnyType).required().valid(3, 4);
-      let any3 = (new AnyType).required().valid('pass1', 'pass2');
-      let schema1 = (new AlternatesType()).required().try(any1, any2, any3);
-      let schema2 = (new AlternatesType()).required().try([any1, any2, any3]);
+  let any1 = (new AnyType).required().valid(1, 2);
+  let any2 = (new AnyType).required().valid(3, 4);
+  let any3 = (new AnyType).required().valid('pass1', 'pass2');
 
-      helpers.validate(schema1, [
+  describe('try()', function() {
+    it ('should pass if one schema is passed - spread', function() {
+      let schema = (new AlternatesType()).required().try(any1, any2, any3);
+
+      helpers.validate(schema, [
         [undefined, false],
         [null, false],
         [1, true],
@@ -29,8 +29,15 @@ describe('AlternatesType', function() {
         [5, false],
         ['any', false]
       ]);
+    });
 
-      helpers.validate(schema2, [
+    it ('should pass if one schema is passed - array', function() {
+      let any1 = (new AnyType).required().valid(1, 2);
+      let any2 = (new AnyType).required().valid(3, 4);
+      let any3 = (new AnyType).required().valid('pass1', 'pass2');
+      let schema = (new AlternatesType()).required().try([any1, any2, any3]);
+
+      helpers.validate(schema, [
         [undefined, false],
         [null, false],
         [1, true],
