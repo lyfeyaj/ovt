@@ -1,6 +1,7 @@
 'use strict';
 
 const helpers = require('../helpers');
+const AnyType = require('../../lib/types/any');
 const StringType = require('../../lib/types/string');
 
 describe('StringType', function() {
@@ -31,7 +32,28 @@ describe('StringType', function() {
         [null, false],
         [0, false],
         [undefined, false],
-        [new String(), false],
+        [new String(), true],
+        ['', true],
+        ['a', true]
+      ], { convert: false });
+    });
+  });
+
+  describe('empty()', function() {
+    it('should validate valid values', function() {
+      helpers.validate(schema.required().empty(''), [
+        [null, false],
+        [0, false],
+        [undefined, false],
+        ['', false],
+        ['a', true]
+      ], { convert: false });
+
+      let empty = (new StringType).isString().valid('', new String);
+      helpers.validate(schema.required().empty(empty), [
+        [null, false],
+        [0, false],
+        [undefined, false],
         ['', false],
         ['a', true]
       ], { convert: false });
