@@ -2,9 +2,11 @@
 
 const expect = require('chai').expect;
 const helpers = require('../helpers');
+const AnyType = require('../../lib/types/any');
 const ObjectType = require('../../lib/types/object');
 const ArrayType = require('../../lib/types/array');
 const StringType = require('../../lib/types/string');
+const NumberType = require('../../lib/types/number');
 
 describe('ObjectType', function() {
   let schema;
@@ -38,6 +40,43 @@ describe('ObjectType', function() {
       expect(schema.convert(true)).to.deep.eq({});
       expect(schema.convert(false)).to.deep.eq({});
       expect(schema.convert([])).to.deep.eq([]);
+    });
+  });
+
+  describe('concat()', function() {
+    let objSchema, strSchema, anySchema;
+
+    beforeEach(function() {
+      objSchema = (new ObjectType).keys({ name: (new StringType).isString().required() });
+      strSchema = (new StringType).isString().required();
+      anySchema = (new AnyType).valid('air', 'water', 'earth').required();
+    });
+
+    it('should raise error if schema types aren\'t match', function() {
+      expect(function() { objSchema.concat(strSchema); }).to.throw(Error);
+      expect(function() { strSchema.concat(objSchema); }).to.throw(Error);
+      expect(function() { anySchema.concat(strSchema); }).to.not.throw(Error);
+      expect(function() { strSchema.concat(anySchema); }).to.not.throw(Error);
+      expect(function() { anySchema.concat(objSchema); }).to.not.throw(Error);
+      expect(function() { objSchema.concat(anySchema); }).to.not.throw(Error);
+      expect(function() { anySchema.concat(anySchema); }).to.not.throw(Error);
+      expect(function() { objSchema.concat(objSchema); }).to.not.throw(Error);
+      expect(function() { strSchema.concat(strSchema); }).to.not.throw(Error);
+    });
+
+    it('should concat another schema', function() {
+      let anyObj = anySchema.concat(objSchema);
+      expect(anyObj).to.not.deep.eq(anySchema);
+      expect(anyObj).to.not.deep.eq(objSchema);
+      expect(anyObj._type).to.eq('object');
+      expect(anyObj._inner.children).to.have.property('name').deep.eq(objSchema._inner.children.name);
+      expect(anyObj._methods).to.have.property('valid').deep.eq(anySchema._methods.valid);
+
+      anyObj = anyObj.keys({ age: (new NumberType).isNumber().integer().min(0) });
+
+      expect(anySchema._inner.children).to.not.have.property('age');
+      expect(objSchema._inner.children).to.not.have.property('age');
+      expect(anyObj._inner.children).to.have.property('age').to.have.property('_type', 'number');
     });
   });
 
