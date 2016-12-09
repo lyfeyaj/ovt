@@ -10,9 +10,50 @@ describe('Schema', function() {
     schema = new Schema();
   });
 
+  describe('convert()', function() {
+    it('should return the same value as passed', function() {
+      expect(schema.convert(1)).to.eq(1);
+      expect(schema.convert('')).to.eq('');
+      expect(schema.convert(null)).to.eq(null);
+      expect(schema.convert({})).to.deep.eq({});
+      expect(schema.convert([1])).to.deep.eq([1]);
+    });
+  });
+
   describe('clone()', function() {
     it('should return a new object instead the original one', function() {
+      schema._defaultValidator = '';
+      schema._methods = { a: 'c' };
+      schema = schema
+        .default('abc')
+        .empty(1)
+        .desc('desc')
+        .note('note1')
+        .tag('tag1');
       let newSchema = schema.clone();
+
+      expect(newSchema).to.have.property('_type', schema._type);
+      expect(newSchema).to.have.property('_defaultValidator', schema._defaultValidator).eq('');
+      expect(newSchema).to.have.property('_defaultValue', schema._defaultValue).eq('abc');
+      expect(newSchema).to.have.property('_emptySchema', schema._emptySchema).eq(1);
+      expect(newSchema).to.have.property('isOvt', schema.isOvt).eq(true);
+      expect(newSchema).to.have.property('_description', schema._description).eq('desc');
+      expect(newSchema).to.have.property('_notes').to.deep.eq(schema._notes).to.include('note1');
+      expect(newSchema).to.have.property('_tags').to.deep.eq(schema._tags).to.include('tag1');
+      expect(newSchema).to.have.property('_methods').to.deep.eq(schema._methods).to.deep.eq({ a: 'c' });
+      expect(newSchema).to.have.property('_inner').to.deep.eq(schema._inner).to.deep.eq({
+        // array inners
+        inclusions: [],
+        requireds: [],
+        ordereds: [],
+        exclusions: [],
+        orderedExclusions: [],
+
+        // object inners
+        children: {},
+        renames: {}
+      });
+
       newSchema['anotherKey'] = 'anotherValue';
       delete newSchema._inner;
       expect(schema).not.have.property('anotherKey');
@@ -24,21 +65,7 @@ describe('Schema', function() {
 
   describe('validate()', function() {
     it('should add custom validators', function() {
-      expect(
-        schema
-          .validate(function() {})
-          .validate(function() {})
-      ).to.have.deep.property('_methods._customValidators').have.length(2);
-    });
-  });
-
-  describe('sanitize()', function() {
-    it('should add custom validators', function() {
-      expect(
-        schema
-          .sanitize(function() {})
-          .sanitize(function() {})
-      ).to.have.deep.property('_methods._customSanitizers').have.length(2);
+      expect(schema.validate(1)).to.have.property('value', 1);
     });
   });
 
@@ -65,6 +92,16 @@ describe('Schema', function() {
       expect(function() {
         schema.description;
       }).to.not.throw(Error);
+    });
+  });
+
+  describe('empty()', function() {
+    it('should add cooresponding empty schema', function() {
+      expect(schema.empty('')).have.property('_emptySchema', '');
+    });
+
+    it('should reset empty schema if nothing passed', function() {
+      expect(schema.empty('').empty()).have.property('_emptySchema', undefined);
     });
   });
 
