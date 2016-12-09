@@ -1,6 +1,8 @@
 Ovt
 ===
 
+[![Build Status](https://travis-ci.org/lyfeyaj/ovt.svg?branch=master)](https://travis-ci.org/lyfeyaj/ovt)
+
 Object schema description language and validator for JavaScript objects.
 
 # Introduction
