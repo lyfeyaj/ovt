@@ -33,12 +33,12 @@ describe('ObjectType', function() {
 
   describe('convert()', function() {
     it('should convert the value to object', function() {
-      expect(schema.convert(1)).to.deep.eq({});
-      expect(schema.convert('')).to.deep.eq({});
+      expect(schema.convert(1)).to.deep.eq(new Number(1));
+      expect(schema.convert('')).to.deep.eq(new String(''));
       expect(schema.convert(null)).to.deep.eq({});
       expect(schema.convert(undefined)).to.deep.eq({});
-      expect(schema.convert(true)).to.deep.eq({});
-      expect(schema.convert(false)).to.deep.eq({});
+      expect(schema.convert(true)).to.deep.eq(new Boolean(true));
+      expect(schema.convert(false)).to.deep.eq(new Boolean(false));
       expect(schema.convert([])).to.deep.eq([]);
     });
   });
