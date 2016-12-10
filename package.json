@@ -4,7 +4,7 @@
   "description": "object validation tool",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --recursive ",
+    "test": "mocha --recursive --reporter nyan",
     "build": "browserify ./browserify.js --insert-global-vars=__filename,__dirname,process,global -t [ babelify --presets [ es2015 ] ] -o dist/ovt.js && uglifyjs dist/ovt.js -c -m -o dist/ovt.min.js"
   },
   "repository": {
@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/baijijs/ovt#readme",
   "dependencies": {
-    "baiji-i18n": "^1.0.0",
+    "baiji-i18n": "^1.1.0",
     "magico": "^1.1.1"
   },
   "devDependencies": {

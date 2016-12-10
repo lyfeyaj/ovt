@@ -409,7 +409,7 @@ var Calculator = function (_BaseCalculator3) {
           // Validator: only handle error
           if (utils.isError(_res)) {
             var msg = method.message(_res, state.args, this.options.locale);
-            this.createError(name, msg, this._description);
+            this.createError(name, msg, this.schema._description);
           } else {
             // if is not
             if (method.type === 'sanitizer') value = _res;
@@ -2592,9 +2592,50 @@ module.exports = function tryCatch(type, fn) {
 };
 
 },{"./isError":31,"./isString":38}],46:[function(require,module,exports){
-module.exports = require('./lib/i18n');
+'use strict';
 
-},{"./lib/i18n":47}],47:[function(require,module,exports){
+var I18n = require('./lib/i18n');
+var magico = require('magico');
+
+// Overwrite the original interpolate function
+// This function interpolates the all variables in the given message.
+// Enhanced with magico support
+I18n.interpolate = function(message, options) {
+  options = this.prepareOptions(options);
+  var matches = message.match(this.placeholder)
+    , placeholder
+    , value
+    , name
+    , regex;
+
+  if (!matches) {
+    return message;
+  }
+
+  while (matches.length) {
+    placeholder = matches.shift();
+    name = placeholder.replace(this.placeholder, '$1');
+
+    // get value by name: support dot path like -> `person.gender`
+    value = magico.get(options, name);
+    if (this.isSet(value)) {
+      value = value.toString().replace(/\$/gm, '_#$#_');
+    } else if (name in options) {
+      value = this.nullPlaceholder(placeholder, message, options);
+    } else {
+      value = this.missingPlaceholder(placeholder, message, options);
+    }
+
+    regex = new RegExp(placeholder.replace(/\{/gm, '\\{').replace(/\}/gm, '\\}'));
+    message = message.replace(regex, value);
+  }
+
+  return message.replace(/_#\$#_/g, '$');
+};
+
+module.exports = I18n;
+
+},{"./lib/i18n":47,"magico":48}],47:[function(require,module,exports){
 // I18n.js
 // =======
 //
@@ -2650,11 +2691,23 @@ module.exports = require('./lib/i18n');
 
   // Is a given value an array?
   // Borrowed from Underscore.js
-  var isArray = function(obj) {
+  var isArray = function(val) {
     if (Array.isArray) {
-      return Array.isArray(obj);
+      return Array.isArray(val);
     };
-    return Object.prototype.toString.call(obj) === '[object Array]';
+    return Object.prototype.toString.call(val) === '[object Array]';
+  };
+
+  var isString = function(val) {
+    return typeof value == 'string' || Object.prototype.toString.call(val) === '[object String]';
+  };
+
+  var isNumber = function(val) {
+    return typeof val == 'number' || Object.prototype.toString.call(val) === '[object Number]';
+  };
+
+  var isBoolean = function(val) {
+    return val === true || val === false;
   };
 
   var decimalAdjust = function(type, value, exp) {
@@ -2675,6 +2728,20 @@ module.exports = require('./lib/i18n');
     value = value.toString().split('e');
     return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
   }
+
+  var merge = function (dest, obj) {
+    var key, value;
+    for (key in obj) if (obj.hasOwnProperty(key)) {
+      value = obj[key];
+      if (isString(value) || isNumber(value) || isBoolean(value)) {
+        dest[key] = value;
+      } else {
+        if (dest[key] == null) dest[key] = {};
+        merge(dest[key], value);
+      }
+    }
+    return dest;
+  };
 
   // Set default days/months translations.
   var DATE = {
@@ -2930,7 +2997,6 @@ module.exports = require('./lib/i18n');
       if (!translations) {
         continue;
       }
-
       while (scopes.length) {
         translations = translations[scopes.shift()];
 
@@ -2947,6 +3013,75 @@ module.exports = require('./lib/i18n');
     if (this.isSet(options.defaultValue)) {
       return options.defaultValue;
     }
+  };
+
+  // lookup pluralization rule key into translations
+  I18n.pluralizationLookupWithoutFallback = function(count, locale, translations) {
+    var pluralizer = this.pluralization.get(locale)
+      , pluralizerKeys = pluralizer(count)
+      , pluralizerKey
+      , message;
+
+    if (isObject(translations)) {
+      while (pluralizerKeys.length) {
+        pluralizerKey = pluralizerKeys.shift();
+        if (this.isSet(translations[pluralizerKey])) {
+          message = translations[pluralizerKey];
+          break;
+        }
+      }
+    }
+
+    return message;
+  };
+
+  // Lookup dedicated to pluralization
+  I18n.pluralizationLookup = function(count, scope, options) {
+    options = this.prepareOptions(options);
+    var locales = this.locales.get(options.locale).slice()
+      , requestedLocale = locales[0]
+      , locale
+      , scopes
+      , translations
+      , message
+    ;
+    scope = this.getFullScope(scope, options);
+
+    while (locales.length) {
+      locale = locales.shift();
+      scopes = scope.split(this.defaultSeparator);
+      translations = this.translations[locale];
+
+      if (!translations) {
+        continue;
+      }
+
+      while (scopes.length) {
+        translations = translations[scopes.shift()];
+        if (!isObject(translations)) {
+          break;
+        }
+        if (scopes.length == 0) {
+          message = this.pluralizationLookupWithoutFallback(count, locale, translations);
+        }
+      }
+      if (message != null && message != undefined) {
+        break;
+      }
+    }
+
+    if (message == null || message == undefined) {
+      if (this.isSet(options.defaultValue)) {
+        if (isObject(options.defaultValue)) {
+          message = this.pluralizationLookupWithoutFallback(count, options.locale, options.defaultValue);
+        } else {
+          message = options.defaultValue;
+        }
+        translations = options.defaultValue;
+      }
+    }
+
+    return { message: message, translations: translations };
   };
 
   // Rails changed the way the meridian is stored.
@@ -3053,7 +3188,7 @@ module.exports = require('./lib/i18n');
     if (typeof(translation) === "string") {
       translation = this.interpolate(translation, options);
     } else if (isObject(translation) && this.isSet(options.count)) {
-      translation = this.pluralize(options.count, translation, options);
+      translation = this.pluralize(options.count, scope, options);
     }
 
     return translation;
@@ -3099,32 +3234,22 @@ module.exports = require('./lib/i18n');
   // which will be retrieved from `options`.
   I18n.pluralize = function(count, scope, options) {
     options = this.prepareOptions(options);
-    var translations, pluralizer, keys, key, message;
+    var pluralizer, message, result;
 
-    if (isObject(scope)) {
-      translations = scope;
-    } else {
-      translations = this.lookup(scope, options);
-    }
-
-    if (!translations) {
+    result = this.pluralizationLookup(count, scope, options);
+    if (result.translations == undefined || result.translations == null) {
       return this.missingTranslation(scope, options);
     }
 
-    pluralizer = this.pluralization.get(options.locale);
-    keys = pluralizer(count);
-
-    while (keys.length) {
-      key = keys.shift();
-
-      if (this.isSet(translations[key])) {
-        message = translations[key];
-        break;
-      }
-    }
-
     options.count = String(count);
-    return this.interpolate(message, options);
+
+    if (result.message != undefined && result.message != null) {
+      return this.interpolate(result.message, options);
+    }
+    else {
+      pluralizer = this.pluralization.get(options.locale);
+      return this.missingTranslation(scope + '.' + pluralizer(count)[0], options);
+    }
   };
 
   // Return a missing translation message for the given parameters.
@@ -3139,8 +3264,9 @@ module.exports = require('./lib/i18n');
           function(match, p1, p2) {return p1 + ' ' + p2.toLowerCase()} );
     }
 
+    var localeForTranslation = (options != null && options.locale != null) ? options.locale : this.currentLocale();
     var fullScope           = this.getFullScope(scope, options);
-    var fullScopeWithLocale = [this.currentLocale(), fullScope].join(this.defaultSeparator);
+    var fullScopeWithLocale = [localeForTranslation, fullScope].join(this.defaultSeparator);
 
     return '[missing "' + fullScopeWithLocale + '" translation]';
   };
@@ -3517,19 +3643,10 @@ module.exports = require('./lib/i18n');
    * https://stackoverflow.com/questions/8157700/object-has-no-hasownproperty-method-i-e-its-undefined-ie8
    */
   I18n.extend = function ( obj1, obj2 ) {
-    var extended = {};
-    var prop;
-    for (prop in obj1) {
-      if (Object.prototype.hasOwnProperty.call(obj1, prop)) {
-        extended[prop] = obj1[prop];
-      }
+    if (typeof(obj1) === "undefined" && typeof(obj2) === "undefined") {
+      return {};
     }
-    for (prop in obj2) {
-      if (Object.prototype.hasOwnProperty.call(obj2, prop)) {
-        extended[prop] = obj2[prop];
-      }
-    }
-    return extended;
+    return merge(obj1, obj2);
   };
 
   // Set aliases, so we can save some typing.
