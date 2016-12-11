@@ -452,7 +452,6 @@ module.exports = {
   convert: true,
   noDefaults: false,
   abortEarly: true,
-  allowUnknown: false,
   defaultLocale: 'en'
 };
 
@@ -895,6 +894,9 @@ var Ovt = function () {
 
     // Expose I18n
     this.I18n = I18n;
+
+    // Support Types
+    this.TYPES = TYPES;
   }
 
   _createClass(Ovt, [{
@@ -930,8 +932,12 @@ var Ovt = function () {
           utils.assert(utils.isFunction(fn), name + ' is not a valid plugin');
           fn(this, options);
         } catch (e) {
-          // eslint-disable-next-line no-console
-          console.log('\x1B[31m\n          You don\'t have module \'' + name + '\' installed correctly, please run command:\n          `npm install ' + name + ' --save`\n          to install the module.\n          Otherwise \'' + name + '\' will not be activated.\n        \x1B[39m');
+          if (e.code === 'MODULE_NOT_FOUND') {
+            // eslint-disable-next-line no-console
+            console.log('\x1B[31m\n            You don\'t have module \'' + name + '\' installed correctly, please run command:\n            `npm install ' + name + ' --save`\n            to install the module.\n            Otherwise \'' + name + '\' will not be activated.\n          \x1B[39m');
+          } else {
+            throw e;
+          }
         }
       } else {
         utils.assert(utils.isFunction(nameOrFn), nameOrFn + ' is not a valid plugin');
@@ -946,10 +952,10 @@ var Ovt = function () {
 
       _opts.skipSantizers = opts.skipSantizers === true;
       _opts.skipValidators = opts.skipValidators === true;
-      _opts.abortEarly = opts.abortEarly == null ? config.abortEarly : opts.abortEarly;
-      _opts.convert = opts.convert == null ? config.convert : opts.convert;
-      _opts.noDefaults = opts.noDefaults == null ? config.noDefaults : opts.noDefaults;
-      _opts.locale = opts.locale || config.defaultLocale || 'en';
+      _opts.abortEarly = opts.abortEarly == null ? this.config.abortEarly : opts.abortEarly;
+      _opts.convert = opts.convert == null ? this.config.convert : opts.convert;
+      _opts.noDefaults = opts.noDefaults == null ? this.config.noDefaults : opts.noDefaults;
+      _opts.locale = opts.locale || this.config.defaultLocale || 'en';
 
       return _opts;
     }
@@ -1008,17 +1014,33 @@ var Ovt = function () {
       return utils.isRef(obj);
     }
 
-    // Create locale object
+    // Create localized message object
+    // { __msg: { en: 'custom message' }, __isLocale: true }
 
+  }, {
+    key: 'l',
+    value: function l(msg) {
+      if (!msg) return;
+      var locale = config.defaultLocale || 'en';
+      if (utils.isString(msg)) {
+        msg = _defineProperty({}, locale, msg);
+      }
+      return { __msg: msg, __isLocale: true };
+    }
   }, {
     key: 'm',
     value: function m(msg) {
-      if (!msg) return;
-      var defaultLocale = config.defaultLocale || 'en';
-      if (utils.isString(msg)) {
-        msg = _defineProperty({}, defaultLocale, msg);
-      }
-      return { __msg: msg, __isLocale: true };
+      return this.l(msg);
+    }
+  }, {
+    key: 'isLocale',
+    value: function isLocale(obj) {
+      return utils.isLocale(obj);
+    }
+  }, {
+    key: 't',
+    value: function t(name, options) {
+      return utils.t(name, options);
     }
   }, {
     key: 'registerLocale',
@@ -1031,7 +1053,9 @@ var Ovt = function () {
       VALID_TYPES.forEach(function (type) {
         translations[type] = Object.assign(magico.get(I18n.translations, prefix + '.' + type) || {}, magico.get(obj, type));
       });
+
       magico.set(I18n.translations, prefix, translations);
+
       return this;
     }
   }]);
@@ -2428,6 +2452,7 @@ module.exports = function isFunction(value) {
 'use strict';
 
 module.exports = function isLocale(obj) {
+  if (!obj) return false;
   return obj && obj.__isLocale === true;
 };
 
@@ -2453,9 +2478,10 @@ module.exports = function isObject(value) {
 };
 
 },{}],36:[function(require,module,exports){
-"use strict";
+'use strict';
 
 module.exports = function isRef(obj) {
+  if (!obj) return false;
   return obj && obj.__isRef === true;
 };
 
@@ -2483,7 +2509,7 @@ module.exports = function isString(value) {
 };
 
 },{"./isArray":28,"./isObject":35,"./obj2Str":42}],39:[function(require,module,exports){
-"use strict";
+'use strict';
 
 module.exports = function isUndefined(value) {
   return value === undefined;
@@ -2504,14 +2530,14 @@ module.exports = function merge(source, target) {
 };
 
 },{}],41:[function(require,module,exports){
-"use strict";
+'use strict';
 
 module.exports = function noop() {
   // No operation;
 };
 
 },{}],42:[function(require,module,exports){
-"use strict";
+'use strict';
 
 module.exports = function (obj) {
   return Object.prototype.toString.call(obj);
