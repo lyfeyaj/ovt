@@ -16,24 +16,13 @@ This is ovt, ovt allows you to create *blueprints* or *schemas* for JavaScript o
 ```javascript
 var Ovt = require('ovt');
 
-var schema = Ovt.object.keys({
-    username: Ovt.string.isLength(3, 30).required,
-    password: Ovt.string.matches(/^[a-zA-Z0-9]{3,30}$/),
-    access_token: Ovt.array.items(Ovt.string, Ovt.number),
-    birthyear: Ovt.number.isInteger.gt(1900).lt(2013),
-    email: Ovt.string.isEmail
+var schema = Ovt.object().keys({
+    username: Ovt.string().isLength(3, 30).required(),
+    password: Ovt.string().matches(/^[a-zA-Z0-9]{3,30}$/),
+    access_token: Ovt.array().items(Ovt.string(), Ovt.number()),
+    birthyear: Ovt.number().isInteger().gt(1900).lt(2013),
+    email: Ovt.string().isEmail()
 });
 
 Ovt.validate({ username: 'abc', birthyear: 1994 }, schema, function (err, value) { });  // err === null -> valid
 ```
-
-# TODO
-
-1. Schema `concat`
-2. Schema `alternative`
-3. Better api for object type
-4. Better error message and i18n
-5. Documentation
-6. Performance
-7. Baiji support
-8. More test cases
