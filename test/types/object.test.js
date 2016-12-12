@@ -116,7 +116,7 @@ describe('ObjectType', function() {
         name: (new StringType).isString().required().valid('Felix'),
         hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required())
       }).keys({
-        gender: (new StringType).isString().required().only(['male', 'femaile', 'unknown'])
+        gender: (new StringType).isString().required().only(['male', 'female', 'unknown'])
       }).keys({
         languages: [new StringType],
         children: { name: new StringType }
@@ -136,7 +136,7 @@ describe('ObjectType', function() {
       let newSchema = new ObjectType().initialize({
         name: (new StringType).isString().required().valid('Felix'),
         hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required()),
-        gender: (new StringType).isString().required().only(['male', 'femaile', 'unknown']),
+        gender: (new StringType).isString().required().only(['male', 'female', 'unknown']),
         languages: [new StringType],
         children: { name: new StringType }
       });
@@ -156,7 +156,7 @@ describe('ObjectType', function() {
         schema
           .add('name', (new StringType).isString().required().valid('Felix'))
           .add('hobbies', (new ArrayType).isArray().required().items((new StringType).isString().required()))
-          .add('gender', (new StringType).isString().required().only(['male', 'femaile', 'unknown']))
+          .add('gender', (new StringType).isString().required().only(['male', 'female', 'unknown']))
       ,
         [
           [null, false],
@@ -171,6 +171,80 @@ describe('ObjectType', function() {
           [{ name: 'Felix', hobbies: [], gender: 'boy' }, false],
           [{ name: 'Felix', gender: 'boy' }, false],
           [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true]
+        ],
+        { convert: false }
+      );
+    });
+  });
+
+  describe('when()', function() {
+    it('should match specific condition - sub condition', function() {
+      helpers.validate(
+        schema.keys({
+          name: (new StringType).isString().required().valid('Felix'),
+          hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required()),
+          gender: (new StringType).isString().required().only(['male', 'female', 'unknown']),
+          x: (new AnyType).when('gender', {
+            is: 'male',
+            then: (new StringType).initialize().valid('xi'),
+            otherwise: (new NumberType).initialize().integer().min(5)
+          })
+        })
+      ,
+        [
+          [null, false],
+          [{}, false],
+          [{ name: 'Jill' }, false],
+          [{ name: 'Felix' }, false],
+          [{ hobbies: ['pingpong'] }, false],
+          [{ name: 'Felix', hobbies: [] }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'] }, false],
+          [{ hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: [], gender: 'boy' }, false],
+          [{ name: 'Felix', gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male', x: 'xi' }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male', x: 1 }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5 }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 2 }, false],
+        ],
+        { convert: false }
+      );
+    });
+
+    it('should match specific condition - parent object condition', function() {
+      helpers.validate(
+        schema.keys({
+          name: (new StringType).isString().required().valid('Felix'),
+          hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required()),
+          gender: (new StringType).isString().required().only(['male', 'female', 'unknown']),
+          x: (new AnyType).initialize()
+        }).when('gender', {
+          is: 'male',
+          then: (new ObjectType).initialize().keys({ x: (new StringType).valid('xi').required() }),
+          otherwise: (new ObjectType).initialize().keys({
+            x: (new NumberType).initialize().integer().min(5)
+          })
+        })
+      ,
+        [
+          [null, false],
+          [{}, false],
+          [{ name: 'Jill' }, false],
+          [{ name: 'Felix' }, false],
+          [{ hobbies: ['pingpong'] }, false],
+          [{ name: 'Felix', hobbies: [] }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'] }, false],
+          [{ hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: [], gender: 'boy' }, false],
+          [{ name: 'Felix', gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male', x: 'xi' }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male', x: 1 }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5 }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 2 }, false],
         ],
         { convert: false }
       );

@@ -83,7 +83,7 @@ describe('Method', function() {
     describe('validator', function() {
       it('should return error if validation failed', function() {
 
-        let state = { value: { length: 2 } };
+        let state = { origin: { length: 2 } };
         let schema = {};
         let options = {};
 
