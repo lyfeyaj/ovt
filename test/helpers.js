@@ -24,6 +24,11 @@ module.exports = {
     });
   },
 
+  attempt: function(schema, value, options) {
+    options = options || {};
+    return Ovt.attempt(value, schema, options);
+  },
+
   validateIt(schemaFn, samples, options) {
     let self = this;
 
