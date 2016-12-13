@@ -41,10 +41,22 @@ var BaseCalculator = function () {
       if (key == null || key !== key || key === '') return path;
       return path ? path + '.' + key : key;
     }
+
+    // create error by priority
+    // 1. schema._error
+    // 2. name by label or key name
+
   }, {
     key: 'createError',
     value: function createError(key, e, label) {
-      this.errors.add(label ? label : this.buildPath(this.path, key), e);
+      var locale = this.options.locale || 'en';
+      var name = label ? label : this.buildPath(this.path, key);
+      var errorMsg = magico.get(this.schema._error, locale);
+      if (errorMsg) {
+        this.errors = this.errors.reset().add(name, errorMsg);
+      } else {
+        this.errors.add(name, e);
+      }
     }
   }, {
     key: 'concatErrors',
@@ -95,6 +107,7 @@ var ArrayInnerCalculator = function (_BaseCalculator) {
     key: 'stateBuilder',
     value: function stateBuilder() {
       return {
+        origin: this.state.origin,
         key: this.state.key,
         value: this.state.value,
         path: this.state.path,
@@ -257,6 +270,7 @@ var ObjectInnerCalculator = function (_BaseCalculator2) {
         name = this.rename(name);
 
         var res = Calculator.execute(magico.get(value, name), schema, {
+          origin: this.state.origin,
           value: value,
           path: this.path,
           key: name,
@@ -357,6 +371,7 @@ var Calculator = function (_BaseCalculator3) {
     value: function execInners(value) {
       var calc = void 0;
       var state = {
+        origin: this.state.origin,
         key: '',
         path: this.path,
         value: value,
@@ -395,6 +410,7 @@ var Calculator = function (_BaseCalculator3) {
           if (method.canBeBypassed(this.options)) continue;
 
           var state = {
+            origin: this.state.origin,
             value: value,
             path: this.path,
             key: name,
@@ -409,7 +425,7 @@ var Calculator = function (_BaseCalculator3) {
           // Validator: only handle error
           if (utils.isError(_res)) {
             var msg = method.message(_res, state.args, this.options.locale);
-            this.createError(name, msg, this.schema._description);
+            this.createError(name, msg, this.schema._label);
           } else {
             // if is not
             if (method.type === 'sanitizer') value = _res;
@@ -445,7 +461,7 @@ Calculator.ObjectInnerCalculator = ObjectInnerCalculator;
 
 module.exports = Calculator;
 
-},{"./errors":4,"./utils":27,"magico":48}],3:[function(require,module,exports){
+},{"./errors":4,"./utils":27,"magico":49}],3:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -487,14 +503,26 @@ var Errors = function (_Error) {
   }
 
   /**
-   * add a new error
-   * {
-   *   isEmail: ['not a valid email']
-   * }
+   * reset errors
    */
 
 
   _createClass(Errors, [{
+    key: 'reset',
+    value: function reset() {
+      this.hasErrors = false;
+      this._errors = {};
+      return this;
+    }
+
+    /**
+     * add a new error
+     * {
+     *   isEmail: ['not a valid email']
+     * }
+     */
+
+  }, {
     key: 'add',
     value: function add(name, msg) {
       this.hasErrors = true;
@@ -803,6 +831,7 @@ var Method = function () {
       schema = schema || {};
       options = options || {};
       state = state || {
+        origin: undefined,
         path: '',
         key: '',
         value: undefined,
@@ -811,9 +840,15 @@ var Method = function () {
 
       var args = utils.cloneArray(this.args);
 
-      // replace reference value
+      // search for reference value
+      // 1. search original value
+      // 2. search current value
       for (var key in this.refs) {
-        args[key] = magico.get(state.value, this.refs[key].__key);
+        var refValue = magico.get(state.value, this.refs[key].__key);
+        if (utils.isUndefined(refValue)) {
+          refValue = magico.get(state.origin, this.refs[key].__key);
+        }
+        args[key] = refValue;
       }
 
       state.args = args;
@@ -856,7 +891,7 @@ var Method = function () {
 
 module.exports = Method;
 
-},{"./utils":27,"magico":48}],8:[function(require,module,exports){
+},{"./utils":27,"magico":49}],8:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -881,6 +916,9 @@ var VALID_TYPES = Object.keys(TYPES);
 var Ovt = function () {
   function Ovt() {
     _classCallCheck(this, Ovt);
+
+    // Current version.
+    this.VERSION = '1.1.0';
 
     // Register default locale
     this.registerLocale('en', EN_LOCALE);
@@ -959,9 +997,12 @@ var Ovt = function () {
 
       return _opts;
     }
+
+    // Validates a value using the given schema and options
+
   }, {
     key: 'validate',
-    value: function validate(obj, schema, optionsOrCallback, callback) {
+    value: function validate(value, schema, optionsOrCallback, callback) {
       utils.assert(schema && schema.isOvt, utils.obj2Str(schema) + ' is not a valid Schema');
 
       var options = {};
@@ -973,18 +1014,13 @@ var Ovt = function () {
       }
       options = this.parseOptions(options);
 
-      var res = Calculator.execute(obj, schema, {
+      var res = Calculator.execute(value, schema, {
+        origin: value,
         path: '',
         key: '',
-        value: obj,
+        value: value,
         errors: new Errors()
       }, options);
-      // let res = schema._validate(obj, {
-      //   path: '',
-      //   key: '',
-      //   value: obj,
-      //   errors: new Errors()
-      // }, options);
 
       if (utils.isFunction(callback)) {
         return callback(res.errors, res.value);
@@ -992,13 +1028,25 @@ var Ovt = function () {
         return res;
       }
     }
+
+    // Validates a value against a schema and throws if validation fails
+
   }, {
     key: 'assert',
-    value: function assert(obj, schema, options) {
-      var res = this.validate(obj, schema, options);
-      if (res.errors) {
-        throw res.errors;
-      }
+    value: function assert(value, schema, options) {
+      var res = this.validate(value, schema, options);
+      if (res.errors) throw res.errors;
+    }
+
+    // Validates a value against a schema, returns valid object,
+    // and throws if validation fails
+
+  }, {
+    key: 'attempt',
+    value: function attempt(value, schema, options) {
+      var res = this.validate(value, schema, options);
+      if (res.errors) throw res.errors;
+      return res.value;
     }
 
     // Create ref object
@@ -1006,7 +1054,7 @@ var Ovt = function () {
   }, {
     key: 'ref',
     value: function ref(key) {
-      return { __key: key, __isRef: true };
+      return utils.ref(key);
     }
   }, {
     key: 'isRef',
@@ -1037,11 +1085,20 @@ var Ovt = function () {
     value: function isLocale(obj) {
       return utils.isLocale(obj);
     }
+
+    // I18n translate
+
   }, {
     key: 't',
     value: function t(name, options) {
       return utils.t(name, options);
     }
+
+    // Add specific locale
+    // Example:
+    //   locale: 'en'
+    //   obj: { any: { required: 'is required' } }
+
   }, {
     key: 'registerLocale',
     value: function registerLocale(locale, obj) {
@@ -1077,15 +1134,18 @@ VALID_TYPES.forEach(function (name) {
 
 module.exports = new Ovt();
 
-},{"./calculator":2,"./config":3,"./errors":4,"./locales/en":5,"./locales/zh-CN":6,"./schema":9,"./types":17,"./utils":27,"baiji-i18n":46,"magico":48}],9:[function(require,module,exports){
+},{"./calculator":2,"./config":3,"./errors":4,"./locales/en":5,"./locales/zh-CN":6,"./schema":9,"./types":17,"./utils":27,"baiji-i18n":47,"magico":49}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var utils = require('./utils');
 var Calculator = require('./calculator');
+var config = require('./config');
 
 var Schema = function () {
   function Schema() {
@@ -1096,7 +1156,9 @@ var Schema = function () {
     this._defaultValue = undefined;
     this._emptySchema = undefined;
     this.isOvt = true;
+    this._label = undefined;
     this._description = undefined;
+    this._error = undefined;
     this._notes = [];
     this._tags = [];
     this._methods = {};
@@ -1131,11 +1193,13 @@ var Schema = function () {
     value: function clone() {
       var obj = new this.constructor();
 
+      obj._error = this._error;
       obj._defaultValidator = this._defaultValidator;
       obj._defaultValue = this._defaultValue;
       obj._emptySchema = this._emptySchema;
       obj._methods = utils.merge({}, this._methods);
 
+      obj._label = this._label;
       obj._description = this._description;
       obj._notes = utils.cloneArray(this._notes);
       obj._tags = utils.cloneArray(this._tags);
@@ -1170,9 +1234,11 @@ var Schema = function () {
       }
 
       source._defaultValidator = target._defaultValidator;
+      source._error = target._error;
       source._defaultValue = target._defaultValue;
       source._emptySchema = target._emptySchema;
       source._description = target._description;
+      source._label = target._label;
       source._notes = source._notes.concat(target._notes);
       source._tags = source._tags.concat(target._tags);
 
@@ -1190,9 +1256,30 @@ var Schema = function () {
     }
   }, {
     key: 'validate',
-    value: function validate(value, options) {
-      var state = { path: '', key: '', value: value, hasErrors: false };
+    value: function validate(value, options, state) {
+      state = state || {};
+      state = {
+        origin: state.origin === undefined ? value : state.origin,
+        path: state.path,
+        key: state.key,
+        value: value,
+        hasErrors: state.hasErrors || false
+      };
       return Calculator.execute(value, this, state, options);
+    }
+  }, {
+    key: 'error',
+    value: function error(msg) {
+      var locale = config.defaultLocale || 'en';
+      if (utils.isString(msg)) {
+        this._error = _defineProperty({}, locale, msg);
+      } else if (utils.isObject(msg)) {
+        this._error = msg;
+      } else {
+        throw new Error('invalid custom error');
+      }
+
+      return this;
     }
   }]);
 
@@ -1213,7 +1300,24 @@ chainable('desc', 'description', {
     if (utils.isUndefined(desc)) return this;
 
     utils.assert(utils.isString(desc), 'Description must be a non-empty string');
+
     this._description = desc;
+
+    // set label
+    if (utils.isUndefined(this._label)) this._label = desc;
+
+    return this;
+  }
+});
+
+chainable('label', {
+  chainingBehaviour: function addLabel(label) {
+    if (utils.isUndefined(label)) return this;
+
+    utils.assert(utils.isString(label), 'Label must be a non-empty string');
+
+    this._label = label;
+
     return this;
   }
 });
@@ -1260,8 +1364,12 @@ chainable('default', {
 
 module.exports = Schema;
 
-},{"./calculator":2,"./utils":27}],10:[function(require,module,exports){
+},{"./calculator":2,"./config":3,"./utils":27}],10:[function(require,module,exports){
 'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1283,6 +1391,14 @@ var AlternativesType = function (_AnyType) {
     _this._type = 'alternatives';
     return _this;
   }
+
+  _createClass(AlternativesType, [{
+    key: 'initialize',
+    value: function initialize() {
+      var self = _get(AlternativesType.prototype.__proto__ || Object.getPrototypeOf(AlternativesType.prototype), 'initialize', this).call(this);
+      return self.try.apply(self, arguments);
+    }
+  }]);
 
   return AlternativesType;
 }(AnyType);
@@ -1362,6 +1478,8 @@ var AnyType = function (_Schema) {
   return AnyType;
 }(Schema);
 
+module.exports = AnyType;
+
 var chainable = utils.chainable(AnyType.prototype, 'any');
 
 chainable('required', {
@@ -1427,9 +1545,57 @@ chainable('invalid', 'not', 'disallow', 'blacklist', {
   }
 });
 
-module.exports = AnyType;
+var AlternativesType = require('./alternatives');
+chainable('when', {
+  // Check and parse ref and condition
+  parseArgs: function parseArgs(ref, condition) {
+    condition = condition || {};
 
-},{"../schema":9,"../utils":27}],12:[function(require,module,exports){
+    utils.assert(condition.then || condition.otherwise, 'one of condition.then or condition.otherwise must be existed');
+    utils.assert(!condition.then || condition.then && condition.then.isOvt, 'condition.then must be a valid ovt schema');
+    utils.assert(!condition.otherwise || condition.otherwise && condition.otherwise.isOvt, 'condition.otherwise must be a valid ovt schema');
+
+    if (utils.isString(ref)) ref = utils.ref(ref);
+
+    utils.assert(utils.isRef(ref), 'ref must be a valid string or ref object');
+
+    return [ref, condition];
+  },
+
+  method: function method(val, refValue, condition) {
+    condition = condition || {};
+    var res = {};
+    var is = condition.is;
+    var then = condition.then;
+    var otherwise = condition.otherwise;
+
+    var matched = false;
+    if (is && is.isOvt) {
+      matched = is.validate(refValue, this.options, this.state);
+      matched = !matched.errors;
+    } else {
+      matched = is === refValue;
+    }
+
+    if (matched) {
+      if (then && then.isOvt) res = then.validate(val, this.options, this.state);
+    } else {
+      if (otherwise && otherwise.isOvt) res = otherwise.validate(val, this.options);
+    }
+
+    return res.errors ? new Error('validation failed') : res.value;
+  },
+
+  // Convert type into alternatives
+  chainingBehaviour: function chainingBehaviour() {
+    var self = new AlternativesType().initialize(this);
+    return self;
+  },
+
+  type: 'sanitizer'
+});
+
+},{"../schema":9,"../utils":27,"./alternatives":10}],12:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2133,6 +2299,7 @@ function addChainableMethod(ctx, type, name, options) {
 
   var hasChainingBehaviour = isFunction(options.chainingBehaviour);
   var hasMethod = isFunction(options.method);
+  var hasParseArgs = isFunction(options.parseArgs);
 
   assert(hasMethod || hasChainingBehaviour, 'Invalid chainable method `' + name + '`, options method or chainingBehaviour should be provided!');
 
@@ -2148,16 +2315,21 @@ function addChainableMethod(ctx, type, name, options) {
   // Add cooresponding method
   ctx[name] = function (fn) {
     var self = this.clone();
+    var args = cloneArray(arguments);
+
+    // Apply parseArgs
+    if (hasParseArgs) {
+      args = options.parseArgs.apply(null, args);
+    }
 
     // Apply chainable behaviour
     if (hasChainingBehaviour) {
-      self = options.chainingBehaviour.apply(self, arguments) || self;
+      self = options.chainingBehaviour.apply(self, args) || self;
     }
 
     // Add method
     if (hasMethod) {
       var _fn = defaultFn;
-      var args = cloneArray(arguments);
 
       // handle method overwritten for validators
       // for example: ovt.string.isEmail(function(val) { /* your custom validator */ });
@@ -2367,6 +2539,12 @@ exports.cloneObject = require('./cloneObject');
 exports.isRef = require('./isRef');
 
 /*!
+ * Create a ref object
+ */
+
+exports.ref = require('./ref');
+
+/*!
  * Check if a object is locale config
  */
 
@@ -2384,7 +2562,7 @@ exports.t = require('./t');
 
 exports.merge = require('./merge');
 
-},{"./assert":22,"./castArray":23,"./chainable":24,"./cloneArray":25,"./cloneObject":26,"./isArray":28,"./isBoolean":29,"./isDate":30,"./isError":31,"./isFunction":32,"./isLocale":33,"./isNumber":34,"./isObject":35,"./isRef":36,"./isRegExp":37,"./isString":38,"./isUndefined":39,"./merge":40,"./noop":41,"./obj2Str":42,"./parseArg":43,"./t":44,"./tryCatch":45}],28:[function(require,module,exports){
+},{"./assert":22,"./castArray":23,"./chainable":24,"./cloneArray":25,"./cloneObject":26,"./isArray":28,"./isBoolean":29,"./isDate":30,"./isError":31,"./isFunction":32,"./isLocale":33,"./isNumber":34,"./isObject":35,"./isRef":36,"./isRegExp":37,"./isString":38,"./isUndefined":39,"./merge":40,"./noop":41,"./obj2Str":42,"./parseArg":43,"./ref":44,"./t":45,"./tryCatch":46}],28:[function(require,module,exports){
 'use strict';
 
 var isObject = require('./isObject');
@@ -2564,6 +2742,13 @@ module.exports = function parseArg(args) {
 },{"./cloneArray":25,"./isArray":28}],44:[function(require,module,exports){
 'use strict';
 
+module.exports = function ref(key) {
+  return { __key: key, __isRef: true };
+};
+
+},{}],45:[function(require,module,exports){
+'use strict';
+
 var magico = require('magico');
 var I18n = require('baiji-i18n');
 var config = require('../config');
@@ -2582,7 +2767,7 @@ module.exports = function t(name, options) {
   return I18n.t(name, options);
 };
 
-},{"../config":3,"baiji-i18n":46,"magico":48}],45:[function(require,module,exports){
+},{"../config":3,"baiji-i18n":47,"magico":49}],46:[function(require,module,exports){
 'use strict';
 
 var isError = require('./isError');
@@ -2617,7 +2802,7 @@ module.exports = function tryCatch(type, fn) {
   };
 };
 
-},{"./isError":31,"./isString":38}],46:[function(require,module,exports){
+},{"./isError":31,"./isString":38}],47:[function(require,module,exports){
 'use strict';
 
 var I18n = require('./lib/i18n');
@@ -2661,7 +2846,7 @@ I18n.interpolate = function(message, options) {
 
 module.exports = I18n;
 
-},{"./lib/i18n":47,"magico":48}],47:[function(require,module,exports){
+},{"./lib/i18n":48,"magico":49}],48:[function(require,module,exports){
 // I18n.js
 // =======
 //
@@ -3683,7 +3868,7 @@ module.exports = I18n;
   return I18n;
 }));
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 /*!
