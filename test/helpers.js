@@ -24,6 +24,22 @@ module.exports = {
     });
   },
 
+  attempt: function(schema, value, options) {
+    options = options || {};
+    return Ovt.attempt(value, schema, options);
+  },
+
+  validateIt(schemaFn, samples, options) {
+    let self = this;
+
+    (samples || []).forEach(function(sample) {
+      it(`- sample: ${JSON.stringify(sample)}`, function() {
+        let schema = schemaFn();
+        self.validate(schema, [sample], options);
+      });
+    });
+  },
+
   inheritsAnyTypeBy: function(type) {
     let schema;
     beforeEach(function() {

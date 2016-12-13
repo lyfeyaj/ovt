@@ -77,7 +77,7 @@ describe('Schema', function() {
 
     it('should not throw an error if no description added', function() {
       expect(function() {
-        schema.desc;
+        schema.desc();
       }).to.not.throw(Error);
     });
   });
@@ -86,11 +86,25 @@ describe('Schema', function() {
     it('should add cooresponding description', function() {
       let description = 'schema validator';
       expect(schema.description(description)).have.property('_description', description);
+      expect(schema.description(description)).have.property('_label', description);
     });
 
     it('should not throw an error if no description added', function() {
       expect(function() {
-        schema.description;
+        schema.description();
+      }).to.not.throw(Error);
+    });
+  });
+
+  describe('label()', function() {
+    it('should add cooresponding label', function() {
+      let label = 'schema validator';
+      expect(schema.label(label)).have.property('_label', label);
+    });
+
+    it('should not throw an error if no label added', function() {
+      expect(function() {
+        schema.label();
       }).to.not.throw(Error);
     });
   });
@@ -113,7 +127,7 @@ describe('Schema', function() {
 
     it('should not throw an error if no default value added', function() {
       expect(function() {
-        schema.default;
+        schema.default();
       }).to.not.throw(Error);
     });
   });
@@ -128,7 +142,7 @@ describe('Schema', function() {
 
     it('should not throw an error if no note added', function() {
       expect(function() {
-        schema.note;
+        schema.note();
       }).to.not.throw(Error);
     });
   });
@@ -143,7 +157,7 @@ describe('Schema', function() {
 
     it('should not throw an error if no note added', function() {
       expect(function() {
-        schema.notes;
+        schema.notes();
       }).to.not.throw(Error);
     });
   });
@@ -158,7 +172,7 @@ describe('Schema', function() {
 
     it('should not throw an error if no tag added', function() {
       expect(function() {
-        schema.tags;
+        schema.tags();
       }).to.not.throw(Error);
     });
   });
@@ -173,7 +187,7 @@ describe('Schema', function() {
 
     it('should not throw an error if no tag added', function() {
       expect(function() {
-        schema.tag;
+        schema.tag();
       }).to.not.throw(Error);
     });
   });

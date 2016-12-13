@@ -26,3 +26,9 @@ var schema = Ovt.object().keys({
 
 Ovt.validate({ username: 'abc', birthyear: 1994 }, schema, function (err, value) { });  // err === null -> valid
 ```
+
+# Plugins
+
++ [ovt-plugin-lodash](https://github.com/lyfeyaj/ovt-plugin-lodash)
++ [ovt-plugin-validator](https://github.com/lyfeyaj/ovt-plugin-validator)
++ [ovt-plugin-xss](https://github.com/lyfeyaj/ovt-plugin-xss)

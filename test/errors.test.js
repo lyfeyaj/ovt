@@ -34,6 +34,19 @@ describe('Errors', function() {
     });
   });
 
+  describe('reset()', function() {
+    it('should reset errors', function() {
+      errors.add('name', 'can\'t be empty');
+      errors.add('age');
+
+      expect(errors.any()).to.be.true;
+
+      errors.reset();
+
+      expect(errors.any()).to.be.false;
+    });
+  });
+
   describe('get()', function() {
     it('should return error messages by name', function() {
       errors.add('name', 'can\'t be empty');

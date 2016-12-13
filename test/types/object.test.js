@@ -11,15 +11,19 @@ const NumberType = require('../../lib/types/number');
 describe('ObjectType', function() {
   let schema;
 
+  let schemaBuilder = function() {
+    return (new ObjectType()).isObject();
+  };
+
   beforeEach(function() {
-    schema = (new ObjectType()).isObject();
+    schema = schemaBuilder();
   });
 
   helpers.inheritsAnyTypeBy(ObjectType);
 
   describe('isObject()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema, [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() { return schema; }, [
         [null, false],
         [0, false],
         ['', false],
@@ -111,52 +115,61 @@ describe('ObjectType', function() {
   ];
 
   describe('keys()', function() {
-    it('should validate valid values', function() {
-      let newSchema = schema.keys({
+    describe('validate valid values', function() {
+      let newSchema = (new ObjectType()).initialize().keys({
         name: (new StringType).isString().required().valid('Felix'),
         hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required())
       }).keys({
-        gender: (new StringType).isString().required().only(['male', 'femaile', 'unknown'])
+        gender: (new StringType).isString().required().only(['male', 'female', 'unknown'])
       }).keys({
         languages: [new StringType],
         children: { name: new StringType }
       });
-      helpers.validate(newSchema, testCases, { convert: false });
 
-      newSchema.keys({
-        nickname: (new StringType).isString().required().valid('my nick name')
+      helpers.validateIt(function() { return newSchema; }, testCases, { convert: false });
+
+      it('should not have nickname as key', function() {
+        newSchema.keys({
+          nickname: (new StringType).isString().required().valid('my nick name')
+        });
+
+        expect(newSchema._inner.children).not.to.have.property('nickname');
       });
-
-      expect(newSchema._inner.children).not.to.have.property('nickname');
     });
   });
 
   describe('initialize()', function() {
-    it('should validate valid values', function() {
+    describe('validate valid values', function() {
       let newSchema = new ObjectType().initialize({
         name: (new StringType).isString().required().valid('Felix'),
         hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required()),
-        gender: (new StringType).isString().required().only(['male', 'femaile', 'unknown']),
+        gender: (new StringType).isString().required().only(['male', 'female', 'unknown']),
         languages: [new StringType],
         children: { name: new StringType }
       });
-      helpers.validate(newSchema, testCases, { convert: false });
 
-      newSchema.keys({
-        nickname: (new StringType).isString().required().valid('my nick name')
+      helpers.validateIt(function() { return newSchema; }, testCases, { convert: false });
+
+      it('should not have nickname as key', function() {
+        newSchema.keys({
+          nickname: (new StringType).isString().required().valid('my nick name')
+        });
+
+        expect(newSchema._inner.children).not.to.have.property('nickname');
       });
-
-      expect(newSchema._inner.children).not.to.have.property('nickname');
     });
   });
 
   describe('add()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(
-        schema
-          .add('name', (new StringType).isString().required().valid('Felix'))
-          .add('hobbies', (new ArrayType).isArray().required().items((new StringType).isString().required()))
-          .add('gender', (new StringType).isString().required().only(['male', 'femaile', 'unknown']))
+    describe('should validate valid values', function() {
+      helpers.validateIt(
+        function() {
+          return schemaBuilder()
+            .add('name', (new StringType).isString().required().valid('Felix'))
+            .add('hobbies', (new ArrayType).isArray().required().items((new StringType).isString().required()))
+            .add('gender', (new StringType).isString().required().only(['male', 'female', 'unknown']));
+        }
+
       ,
         [
           [null, false],
@@ -171,6 +184,134 @@ describe('ObjectType', function() {
           [{ name: 'Felix', hobbies: [], gender: 'boy' }, false],
           [{ name: 'Felix', gender: 'boy' }, false],
           [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true]
+        ],
+        { convert: false }
+      );
+    });
+  });
+
+  describe('when()', function() {
+    describe('should match specific condition - sub condition', function() {
+      helpers.validateIt(
+        function() {
+          return schemaBuilder().keys({
+            name: (new StringType).isString().required().valid('Felix'),
+            hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required()),
+            gender: (new StringType).isString().required().only(['male', 'female', 'unknown']),
+            x: (new AnyType).when('gender', {
+              is: 'male',
+              then: (new StringType).initialize().valid('xi'),
+              otherwise: (new NumberType).initialize().integer().min(5)
+            })
+          });
+        }
+      ,
+        [
+          [null, false],
+          [{}, false],
+          [{ name: 'Jill' }, false],
+          [{ name: 'Felix' }, false],
+          [{ hobbies: ['pingpong'] }, false],
+          [{ name: 'Felix', hobbies: [] }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'] }, false],
+          [{ hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: [], gender: 'boy' }, false],
+          [{ name: 'Felix', gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male', x: 'xi' }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male', x: 1 }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5 }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 2 }, false],
+        ],
+        { convert: false }
+      );
+    });
+
+    describe('should match specific condition - parent object condition', function() {
+      helpers.validateIt(
+        function() {
+          return schemaBuilder().keys({
+            name: (new StringType).isString().required().valid('Felix'),
+            hobbies: (new ArrayType).isArray().required().items((new StringType).isString().required()),
+            gender: (new StringType).isString().required().only(['male', 'female', 'unknown']),
+            x: (new AnyType).initialize(),
+            profile: schemaBuilder().keys({
+              school: (new StringType).isString().required(),
+              age: (new NumberType).initialize().required().integer().min(0),
+              job: (new StringType).initialize()
+            }).when(
+              'age',
+              {
+                is: (new NumberType).initialize().min(22),
+                then: (new ObjectType).initialize({
+                  job: (new StringType).initialize().required()
+                }).rename('job', 'career')
+              }
+            )
+          }).when('gender', {
+            is: 'male',
+            then: (new ObjectType).initialize().keys({
+              x: (new StringType).initialize().valid('xi').required()
+            }),
+            otherwise: (new ObjectType).initialize().keys({
+              x: (new NumberType).initialize().integer().min(5)
+            })
+          });
+        }
+      ,
+        [
+          [null, false],
+          [{}, false],
+          [{ name: 'Jill' }, false],
+          [{ name: 'Felix' }, false],
+          [{ hobbies: ['pingpong'] }, false],
+          [{ name: 'Felix', hobbies: [] }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'] }, false],
+          [{ hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: [], gender: 'boy' }, false],
+          [{ name: 'Felix', gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male', x: 'xi' }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male', x: 1 }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5 }, true],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 2 }, false],
+          [{
+            name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5,
+            profile: {}
+          }, false],
+          [{
+            name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5,
+            profile: { school: 'MIT' }
+          }, false],
+          [{
+            name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5,
+            profile: { school: 'MIT', age: -1 }
+          }, false],
+          [{
+            name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5,
+            profile: { school: 'MIT', age: 1 }
+          }, true],
+          [{
+            name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5,
+            profile: { school: 'MIT', age: 1.1 }
+          }, false],
+          [{
+            name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5,
+            profile: { school: 'MIT', age: 22 }
+          }, false],
+          [{
+            name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5,
+            profile: { school: 'MIT', age: 22, job: 'Accounting' }
+          }, true],
+          [{
+            name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5,
+            profile: { school: 'MIT', age: 22, job: 'Accounting' }
+          }, {
+            name: 'Felix', hobbies: ['pingpong'], gender: 'female', x: 5,
+            profile: { school: 'MIT', age: 22, career: 'Accounting' }
+          }],
         ],
         { convert: false }
       );

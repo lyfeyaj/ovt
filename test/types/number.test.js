@@ -27,8 +27,8 @@ describe('NumberType', function() {
   });
 
   describe('isNumber()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema, [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() { return schema; }, [
         [null, false],
         [0, true],
         [-1, true],
@@ -40,8 +40,10 @@ describe('NumberType', function() {
   });
 
   describe('isInteger()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema.isInteger(), [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() {
+        return schema.isInteger();
+      }, [
         [null, false],
         [0, true],
         [-1, true],
@@ -54,8 +56,10 @@ describe('NumberType', function() {
   });
 
   describe('integer()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema.integer(), [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() {
+        return schema.integer();
+      }, [
         [null, false],
         [0, true],
         [-1, true],
@@ -68,8 +72,10 @@ describe('NumberType', function() {
   });
 
   describe('isPositive()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema.isPositive(), [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() {
+        return schema.isPositive();
+      }, [
         [null, false],
         [0, false],
         [-1, false],
@@ -83,8 +89,10 @@ describe('NumberType', function() {
   });
 
   describe('positive()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema.positive(), [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() {
+        return schema.positive();
+      }, [
         [null, false],
         [0, false],
         [-1, false],
@@ -98,8 +106,10 @@ describe('NumberType', function() {
   });
 
   describe('isNegative()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema.isNegative(), [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() {
+        return schema.isNegative();
+      }, [
         [null, false],
         [0, false],
         [-1, true],
@@ -113,8 +123,10 @@ describe('NumberType', function() {
   });
 
   describe('negative()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema.negative(), [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() {
+        return schema.negative();
+      }, [
         [null, false],
         [0, false],
         [-1, true],
@@ -128,8 +140,10 @@ describe('NumberType', function() {
   });
 
   describe('min()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema.min(5), [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() {
+        return schema.min(5);
+      }, [
         [null, false],
         [0, false],
         [-1, false],
@@ -144,8 +158,10 @@ describe('NumberType', function() {
   });
 
   describe('max()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema.max(5), [
+    describe('validate valid values', function() {
+      helpers.validateIt(function() {
+        return schema.max(5);
+      }, [
         [null, false],
         [0, true],
         [-1, true],
@@ -157,6 +173,40 @@ describe('NumberType', function() {
         [NaN, false],
         [new Number(), true]
       ], { convert: false });
+    });
+  });
+
+  describe('error()', function() {
+    describe('with error and label', function() {
+      it('should return specific error', function() {
+        expect(function() {
+          helpers.attempt(schema.integer().min(5).positive().max(100).error('is invalid').label('age'), -2, { abortEarly: false });
+        }).to.throw(Error).to.have.property('_errors').deep.eq({ age: [ 'is invalid' ] });
+      });
+    });
+
+    describe('with label and without error', function() {
+      it('should return specific error', function() {
+        expect(function() {
+          helpers.attempt(schema.integer().min(5).positive().max(100).label('age'), -2, { abortEarly: false });
+        }).to.throw(Error).to.have.property('_errors').deep.eq({ age: [ 'can not less than 5', 'is not positive number' ] });
+      });
+    });
+
+    describe('with label but without error', function() {
+      it('should return specific error', function() {
+        expect(function() {
+          helpers.attempt(schema.integer().min(5).positive().max(100).label('age'), -2, { abortEarly: false });
+        }).to.throw(Error).to.have.property('_errors').deep.eq({ age: [ 'can not less than 5', 'is not positive number' ] });
+      });
+    });
+
+    describe('without label and error', function() {
+      it('should return specific error', function() {
+        expect(function() {
+          helpers.attempt(schema.integer().min(5).positive().max(100), -2, { abortEarly: false });
+        }).to.throw(Error).to.have.property('_errors').deep.eq({ min: [ 'can not less than 5' ], positive: [ 'is not positive number' ] });
+      });
     });
   });
 });
