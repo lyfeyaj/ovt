@@ -190,6 +190,39 @@ describe('ObjectType', function() {
     });
   });
 
+  describe('remove()', function() {
+    describe('should validate valid values', function() {
+      var objSchema = function() {
+        return schemaBuilder()
+          .add('name', (new StringType).isString().required().valid('Felix'))
+          .add('hobbies', (new ArrayType).isArray().required().items((new StringType).isString().required()))
+          .add('gender', (new StringType).isString().required().only(['male', 'female', 'unknown']))
+          .remove('hobbies');
+      };
+      helpers.validateIt(objSchema,
+        [
+          [null, false],
+          [{}, false],
+          [{ name: 'Jill' }, false],
+          [{ name: 'Felix', gender: 'male' }, true],
+          [{ hobbies: ['pingpong'] }, false],
+          [{ name: 'Felix', hobbies: [] }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'] }, false],
+          [{ hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: [], gender: 'boy' }, false],
+          [{ name: 'Felix', gender: 'boy' }, false],
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true]
+        ],
+        { convert: false }
+      );
+
+      it('should not have `hobbies` as key child schema', function() {
+        expect(objSchema()).not.to.have.deep.property('_inner.children.hobbies');
+      });
+    });
+  });
+
   describe('when()', function() {
     describe('should match specific condition - sub condition', function() {
       helpers.validateIt(
