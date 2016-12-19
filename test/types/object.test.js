@@ -92,10 +92,15 @@ describe('ObjectType', function() {
     });
 
     it('should rename according to renames', function() {
-      helpers.validate(schema.rename({
+      helpers.validate(schema.keys({
+        name: (new StringType).initialize().required(),
+        sex: (new StringType).initialize().required()
+      }).rename({
         name: 'nickname',
         sex: 'gender'
       }), [
+        [{ name: 'Felix Liu', sex: 'male', age: 18 }, false],
+        [{ name: 'Felix Liu', sex: 'male' }, true],
         [{ name: 'Felix Liu', sex: 'male' }, { nickname: 'Felix Liu', gender: 'male' }]
       ], { convert: false });
     });
@@ -205,14 +210,15 @@ describe('ObjectType', function() {
           [{}, false],
           [{ name: 'Jill' }, false],
           [{ name: 'Felix', gender: 'male' }, true],
-          [{ hobbies: ['pingpong'] }, false],
-          [{ name: 'Felix', hobbies: [] }, false],
-          [{ name: 'Felix', hobbies: ['pingpong'] }, false],
+          [{ }, false],
+          [{ name: 'Felix' }, false],
+          [{ name: 'Felix' }, false],
           [{ hobbies: ['pingpong'], gender: 'boy' }, false],
           [{ name: 'Felix', hobbies: ['pingpong'], gender: 'boy' }, false],
           [{ name: 'Felix', hobbies: [], gender: 'boy' }, false],
           [{ name: 'Felix', gender: 'boy' }, false],
-          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, true]
+          [{ name: 'Felix', hobbies: ['pingpong'], gender: 'male' }, false],
+          [{ name: 'Felix', gender: 'male' }, true]
         ],
         { convert: false }
       );

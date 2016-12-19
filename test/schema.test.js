@@ -29,10 +29,12 @@ describe('Schema', function() {
         .empty(1)
         .desc('desc')
         .note('note1')
-        .tag('tag1');
+        .tag('tag1')
+        .options({ allowUnknown: false });
       let newSchema = schema.clone();
 
       expect(newSchema).to.have.property('_type', schema._type);
+      expect(newSchema).to.have.property('_options').deep.eq({ allowUnknown: false });
       expect(newSchema).to.have.property('_defaultValidator', schema._defaultValidator).eq('');
       expect(newSchema).to.have.property('_defaultValue', schema._defaultValue).eq('abc');
       expect(newSchema).to.have.property('_emptySchema', schema._emptySchema).eq(1);
@@ -66,6 +68,13 @@ describe('Schema', function() {
   describe('validate()', function() {
     it('should add custom validators', function() {
       expect(schema.validate(1)).to.have.property('value', 1);
+    });
+  });
+
+  describe('options()', function() {
+    it('should add schema based options', function() {
+      let opts = { locale: 'zh-CN' };
+      expect(schema.options(opts)).to.have.property('_options').deep.eq(opts);
     });
   });
 

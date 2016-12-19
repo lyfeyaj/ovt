@@ -8,6 +8,8 @@ describe('config', function() {
     expect(config).to.have.a.property('convert', true);
     expect(config).to.have.a.property('noDefaults', false);
     expect(config).to.have.a.property('abortEarly', true);
+    expect(config).to.have.a.property('allowUnknown', false);
+    expect(config).to.have.a.property('stripUnknown', false);
     expect(config).to.have.a.property('defaultLocale', 'en');
   });
 });

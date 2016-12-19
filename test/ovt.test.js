@@ -51,6 +51,24 @@ describe('Ovt', function() {
       expect(ovt.parseOptions({ locale: null })).to.have.property('locale', 'zh-CN');
       expect(ovt.parseOptions({ locale: undefined })).to.have.property('locale', 'zh-CN');
       ovt.config.defaultLocale = 'en';
+
+      expect(ovt.parseOptions({ allowUnknown: false })).to.have.property('allowUnknown', false);
+      expect(ovt.parseOptions({ allowUnknown: true })).to.have.property('allowUnknown', true);
+      expect(ovt.parseOptions({ allowUnknown: null })).to.have.property('allowUnknown', false);
+      expect(ovt.parseOptions({ allowUnknown: undefined })).to.have.property('allowUnknown', false);
+      ovt.config.allowUnknown = true;
+      expect(ovt.parseOptions({ allowUnknown: null })).to.have.property('allowUnknown', true);
+      expect(ovt.parseOptions({ allowUnknown: undefined })).to.have.property('allowUnknown', true);
+      ovt.config.allowUnknown = false;
+
+      expect(ovt.parseOptions({ stripUnknown: false })).to.have.property('stripUnknown', false);
+      expect(ovt.parseOptions({ stripUnknown: true })).to.have.property('stripUnknown', true);
+      expect(ovt.parseOptions({ stripUnknown: null })).to.have.property('stripUnknown', false);
+      expect(ovt.parseOptions({ stripUnknown: undefined })).to.have.property('stripUnknown', false);
+      ovt.config.stripUnknown = true;
+      expect(ovt.parseOptions({ stripUnknown: null })).to.have.property('stripUnknown', true);
+      expect(ovt.parseOptions({ stripUnknown: undefined })).to.have.property('stripUnknown', true);
+      ovt.config.stripUnknown = false;
     });
   });
 
