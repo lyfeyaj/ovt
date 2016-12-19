@@ -820,8 +820,8 @@ var Method = function () {
     key: 'canBeBypassed',
     value: function canBeBypassed(options) {
       options = options || {};
-      if (this.type === 'validator' && options.skipValidators) return true;
-      if (this.type === 'sanitizer' && options.skipSantizers) return true;
+      if (this.is('validator') && options.skipValidators) return true;
+      if (this.is('sanitizer') && options.skipSantizers) return true;
       if (!~ALLOWED_TYPES.indexOf(this.type)) return true;
       return false;
     }
@@ -2113,6 +2113,14 @@ chainable('isObject', { method: utils.isObject });
 chainable('add', {
   chainingBehaviour: function chainingBehaviour(name, schema) {
     return this._addSchema(name, schema);
+  }
+});
+
+chainable('remove', {
+  chainingBehaviour: function chainingBehaviour(name) {
+    utils.assert(utils.isString(name), utils.obj2Str(name) + ' is not a valid key');
+    delete this._inner.children[name];
+    return this;
   }
 });
 
