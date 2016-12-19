@@ -52,6 +52,8 @@ var BaseCalculator = function () {
       var locale = this.options.locale || 'en';
       var name = label ? label : this.buildPath(this.path, key);
       var errorMsg = magico.get(this.schema._error, locale);
+      e = e || new Error('validation failed');
+
       if (errorMsg) {
         this.errors = this.errors.reset().add(name, errorMsg);
       } else {
@@ -144,7 +146,7 @@ var ArrayInnerCalculator = function (_BaseCalculator) {
           var res = Calculator.execute(item, exclusion, self.stateBuilder(), self.options);
 
           if (!res.errors) {
-            self.createError(self.buildPath(currentPath, 'forbidden'), utils.t('array.forbidden') || new Error('Forbidden value can\'t be included'));
+            self.createError(self.buildPath(currentPath, 'forbidden'), utils.t('array.forbidden') || new Error('Forbidden value can\'t be included'), this.schema._label);
           }
         }
 
@@ -216,7 +218,7 @@ var ArrayInnerCalculator = function (_BaseCalculator) {
       if (requireds.length) {
         var preferedLength = self._inner.requireds.length;
         var currentLength = preferedLength - requireds.length;
-        this.createError(this.buildPath(this.path, 'requireds'), utils.t('array.forbidden', { currentLength: currentLength, preferedLength: preferedLength }) || new Error(preferedLength + ' elements are required, now is ' + currentLength));
+        this.createError(this.buildPath(this.path, 'requireds'), utils.t('array.forbidden', { currentLength: currentLength, preferedLength: preferedLength, locale: this.options.locale }) || new Error(preferedLength + ' elements are required, now is ' + currentLength));
       }
 
       if (this.canAbortEarly()) return this.result(value);
@@ -256,7 +258,14 @@ var ObjectInnerCalculator = function (_BaseCalculator2) {
   }, {
     key: 'execute',
     value: function execute() {
-      var value = this.value;
+      var source = utils.cloneObject(this.value || {});
+      var value = this.options.stripUnknown ? {} : source;
+
+      // Get unprocessed keys
+      var unprocessed = {};
+      Object.keys(source).forEach(function (key) {
+        unprocessed[key] = true;
+      });
 
       if (this.canAbortEarly()) return this.result(value);
 
@@ -266,12 +275,12 @@ var ObjectInnerCalculator = function (_BaseCalculator2) {
       for (var name in children) {
         if (this.canAbortEarly()) break;
 
-        var schema = children[name];
-        name = this.rename(name);
+        // delete processed key
+        delete unprocessed[name];
 
-        var res = Calculator.execute(magico.get(value, name), schema, {
+        var res = Calculator.execute(magico.get(source, name), children[name], {
           origin: this.state.origin,
-          value: value,
+          value: source,
           path: this.path,
           key: name,
           hasErrors: this.isErrored()
@@ -280,6 +289,14 @@ var ObjectInnerCalculator = function (_BaseCalculator2) {
         magico.set(value, name, res.value);
 
         this.concatErrors(res.errors);
+      }
+
+      // Check unknown
+      if (!this.options.allowUnknown) {
+        var unprocessedKeys = Object.keys(unprocessed);
+        if (unprocessedKeys.length) {
+          this.createError(utils.t('any.allowUnknown', { args: unprocessedKeys[0], locale: this.options.locale }), null, this.schema._label);
+        }
       }
 
       return this.result(value);
@@ -334,7 +351,7 @@ var Calculator = function (_BaseCalculator3) {
           value = utils.isUndefined(value) ? value : this.schema.convert(value);
         } catch (e) {
           value = null;
-          this.createError('convertError', e);
+          this.createError('convertError', e, this.schema._label);
         }
 
         this.value = value;
@@ -345,9 +362,12 @@ var Calculator = function (_BaseCalculator3) {
     value: function execRenames() {
       // Perform renames
       var value = this.value;
+
       if (value && this.schema._type === 'object') {
         var renames = this.schema._inner.renames;
+
         value = utils.cloneObject(value);
+
         for (var oldName in renames) {
           var newName = renames[oldName];
           if (oldName in value) {
@@ -356,6 +376,7 @@ var Calculator = function (_BaseCalculator3) {
           }
         }
       }
+
       this.value = value;
     }
   }, {
@@ -445,8 +466,8 @@ var Calculator = function (_BaseCalculator3) {
       if (!this.cannotBeBypassed()) return this.result(this.value);
 
       this.applyConvert();
-      this.execRenames();
       this.execMethods();
+      this.execRenames();
 
       return this.result(this.value);
     }
@@ -467,6 +488,8 @@ module.exports = Calculator;
 module.exports = {
   convert: true,
   noDefaults: false,
+  allowUnknown: false,
+  stripUnknown: false,
   abortEarly: true,
   defaultLocale: 'en'
 };
@@ -627,6 +650,7 @@ module.exports = {
   any: {
     unknown: 'validation failed',
     convertError: 'convert failed',
+    allowUnknown: '{{args}} is not allowed',
     required: 'is required',
     optional: 'is optional',
     forbidden: 'is forbidden',
@@ -711,6 +735,7 @@ module.exports = {
   any: {
     unknown: '校验失败',
     convertError: '格式化失败',
+    allowUnknown: '{{args}} 是不允许的',
     required: '不能为空',
     optional: '可选',
     forbidden: '不允许的值',
@@ -871,12 +896,13 @@ var Method = function () {
       args.locale = locale;
 
       var msg = void 0;
+
+      // generate error message by custom locale message
       if (this.locale) msg = magico.get(this.locale, '__msg.' + locale);
 
       // generate error message by i18n
-      if (!msg) {
-        msg = utils.t(this.path, args) || error || '';
-      }
+      if (!msg) msg = utils.t(this.path, args) || error || '';
+
       return msg;
     }
   }, {
@@ -993,6 +1019,8 @@ var Ovt = function () {
       _opts.abortEarly = opts.abortEarly == null ? this.config.abortEarly : opts.abortEarly;
       _opts.convert = opts.convert == null ? this.config.convert : opts.convert;
       _opts.noDefaults = opts.noDefaults == null ? this.config.noDefaults : opts.noDefaults;
+      _opts.allowUnknown = opts.allowUnknown == null ? this.config.allowUnknown : opts.allowUnknown;
+      _opts.stripUnknown = opts.stripUnknown == null ? this.config.stripUnknown : opts.stripUnknown;
       _opts.locale = opts.locale || this.config.defaultLocale || 'en';
 
       return _opts;
@@ -1161,7 +1189,8 @@ var Schema = function () {
     this._error = undefined;
     this._notes = [];
     this._tags = [];
-    this._methods = {};
+    this._methods = Object.create(null);
+    this._options = Object.create(null);
     this._inner = {
       // array inners
       inclusions: [],
@@ -1171,11 +1200,11 @@ var Schema = function () {
       orderedExclusions: [],
 
       // object inners
-      children: {},
-      renames: {}
+      children: Object.create(null),
+      renames: Object.create(null)
     };
 
-    this._virtuals = {};
+    this._virtuals = Object.create(null);
   }
 
   _createClass(Schema, [{
@@ -1198,6 +1227,7 @@ var Schema = function () {
       obj._defaultValue = this._defaultValue;
       obj._emptySchema = this._emptySchema;
       obj._methods = utils.merge({}, this._methods);
+      obj._options = utils.merge({}, this._options);
 
       obj._label = this._label;
       obj._description = this._description;
@@ -1265,6 +1295,8 @@ var Schema = function () {
         value: value,
         hasErrors: state.hasErrors || false
       };
+
+      options = utils.merge(options || {}, this._options);
       return Calculator.execute(value, this, state, options);
     }
   }, {
@@ -1291,6 +1323,14 @@ var chainable = utils.chainable(Schema.prototype);
 chainable('empty', {
   chainingBehaviour: function addDescription(schema) {
     this._emptySchema = schema;
+    return this;
+  }
+});
+
+chainable('options', {
+  chainingBehaviour: function chainingBehaviour(opts) {
+    opts = opts || {};
+    utils.merge(this._options, opts);
     return this;
   }
 });
@@ -1559,6 +1599,12 @@ chainable('when', {
 
     utils.assert(utils.isRef(ref), 'ref must be a valid string or ref object');
 
+    // overwrite `then` and `otherwise` options to allow unknown and not stripped
+    var options = { allowUnknown: true, stripUnknown: false };
+
+    if (condition.then) condition.then = condition.then.options(options);
+    if (condition.otherwise) condition.otherwise = condition.otherwise.options(options);
+
     return [ref, condition];
   },
 
@@ -1569,6 +1615,7 @@ chainable('when', {
     var then = condition.then;
     var otherwise = condition.otherwise;
 
+    // Check `is` condition
     var matched = false;
     if (is && is.isOvt) {
       matched = is.validate(refValue, this.options, this.state);
@@ -1577,11 +1624,14 @@ chainable('when', {
       matched = is === refValue;
     }
 
+    // If matched, perform `then` schema validation
     if (matched) {
       if (then && then.isOvt) res = then.validate(val, this.options, this.state);
-    } else {
-      if (otherwise && otherwise.isOvt) res = otherwise.validate(val, this.options);
     }
+    // Else perform `else` schema validation
+    else {
+        if (otherwise && otherwise.isOvt) res = otherwise.validate(val, this.options);
+      }
 
     return res.errors ? new Error('validation failed') : res.value;
   },
