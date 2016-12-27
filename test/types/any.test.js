@@ -243,4 +243,29 @@ describe('AnyType', function() {
       ]);
     });
   });
+
+  describe('empty()', function() {
+    describe('with forbidden()', function() {
+      helpers.validateIt(function() {
+        return schema.forbidden().empty('');
+      }, [
+        [null, false],
+        [0, false],
+        [undefined, true],
+        ['', false],
+        ['a', false]
+      ], { convert: false });
+
+      let empty = (new AnyType).valid('', new String);
+      helpers.validateIt(function() {
+        return schema.forbidden().empty(empty);
+      }, [
+        [null, false],
+        [0, false],
+        [undefined, true],
+        ['', false],
+        ['a', false]
+      ], { convert: false });
+    });
+  });
 });

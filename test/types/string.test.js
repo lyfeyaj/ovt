@@ -51,8 +51,10 @@ describe('StringType', function() {
   });
 
   describe('empty()', function() {
-    it('should validate valid values', function() {
-      helpers.validate(schema.required().empty(''), [
+    describe('should validate valid values', function() {
+      helpers.validateIt(function() {
+        return schema.required().empty('');
+      }, [
         [null, false],
         [0, false],
         [undefined, false],
@@ -60,8 +62,20 @@ describe('StringType', function() {
         ['a', true]
       ], { convert: false });
 
+      helpers.validateIt(function() {
+        return schema.forbidden().empty('');
+      }, [
+        [null, false],
+        [0, false],
+        [undefined, true],
+        ['', false],
+        ['a', false]
+      ], { convert: false });
+
       let empty = (new StringType).valid('', new String);
-      helpers.validate(schema.required().empty(empty), [
+      helpers.validateIt(function() {
+        return schema.required().empty(empty);
+      }, [
         [null, false],
         [0, false],
         [undefined, false],
