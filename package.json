@@ -1,6 +1,6 @@
 {
   "name": "ovt",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "object validation tool",
   "main": "index.js",
   "scripts": {
