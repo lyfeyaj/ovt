@@ -79,13 +79,15 @@ describe('Errors', function() {
         .add('name', 'is too long')
         .add('age', 'can\'t be less than 0');
 
-      expect(errors.flatten(' ')).to.deep.eq([
+      expect(errors.flatten()).to.deep.eq([
         'name can\'t be empty',
         'name is too long',
         'age can\'t be less than 0'
       ]);
 
-      expect(errors.flatten(' - ')).to.deep.eq([
+      expect(errors.flatten(function(name, msg) {
+        return name + ' - ' + msg;
+      })).to.deep.eq([
         'name - can\'t be empty',
         'name - is too long',
         'age - can\'t be less than 0'
@@ -100,8 +102,10 @@ describe('Errors', function() {
         .add('name', 'is too long')
         .add('age', 'can\'t be less than 0');
 
-      expect(errors.toHuman(' ')).to.eq('name can\'t be empty; name is too long; age can\'t be less than 0');
-      expect(errors.toHuman(' - ')).to.eq('name - can\'t be empty; name - is too long; age - can\'t be less than 0');
+      expect(errors.toHuman()).to.eq('name can\'t be empty; name is too long; age can\'t be less than 0');
+      expect(errors.toHuman(function(name, msg) {
+        return name + ' - ' + msg;
+      })).to.eq('name - can\'t be empty; name - is too long; age - can\'t be less than 0');
     });
   });
 
