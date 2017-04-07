@@ -128,6 +128,19 @@ describe('Schema', function() {
     });
   });
 
+  describe('isEmpty()', function() {
+    it('should check empty according to specific schema or value', function() {
+      expect(schema.empty('').isEmpty('')).to.be.true;
+      expect(schema.empty('').isEmpty('a')).to.be.false;
+
+      expect(schema.empty({}).isEmpty({})).to.be.true;
+      expect(schema.empty({}).isEmpty({ key: 1 })).to.be.false;
+
+      expect(schema.empty([]).isEmpty([])).to.be.true;
+      expect(schema.empty([]).isEmpty([1])).to.be.false;
+    });
+  });
+
   describe('default()', function() {
     it('should add cooresponding default', function() {
       let defaultValue = 'defaut value';
