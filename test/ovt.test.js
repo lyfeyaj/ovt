@@ -74,9 +74,9 @@ describe('Ovt', function() {
 
   describe('addMethod()', function() {
     it('should add method to specific type', function() {
-      expect(ovt.string().abc).not.to.be.a.function;
+      expect(ovt.string().abc).not.to.be.a('function');
       ovt.addMethod('string', 'abc', { method: function(){} });
-      expect(ovt.string().abc).to.be.a.function;
+      expect(ovt.string().abc).to.be.a('function');
     });
   });
 
@@ -137,7 +137,7 @@ describe('Ovt', function() {
           let schema = ovt[name]();
           expect(schema).to.be.instanceOf(TypeSchema);
           if (schema._defaultValidator) {
-            expect(schema).to.have.deep.property(`_methods.${schema._defaultValidator}`);
+            expect(schema).to.have.nested.property(`_methods.${schema._defaultValidator}`);
           }
         });
       });

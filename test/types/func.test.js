@@ -15,8 +15,8 @@ describe('FuncType', function() {
 
   describe('convert()', function() {
     it('should convert the value to function', function() {
-      expect(schema.convert('2016-01-01')).to.be.function;
-      expect(schema.convert(function() {})).to.be.function;
+      expect(schema.convert('2016-01-01')).to.be.a('function');
+      expect(schema.convert(function() {})).to.be.a('function');
       expect(function() {
         schema.convert({});
       }).to.throw(Error);

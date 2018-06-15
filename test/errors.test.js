@@ -27,10 +27,10 @@ describe('Errors', function() {
     it('should add error by name and message', function() {
       errors.add('name', 'can\'t be empty');
       errors.add('age');
-      expect(errors).to.have.deep.property('_errors.name').to.include('can\'t be empty');
-      expect(errors).to.have.deep.property('_errors.name').with.length(1);
-      expect(errors).to.have.deep.property('_errors.age').to.include(errors.defaultMessage('age')).to.include('Validation age failed');
-      expect(errors).to.have.deep.property('_errors.age').with.length(1);
+      expect(errors).to.have.nested.property('_errors.name').to.include('can\'t be empty');
+      expect(errors).to.have.nested.property('_errors.name').with.length(1);
+      expect(errors).to.have.nested.property('_errors.age').to.include(errors.defaultMessage('age')).to.include('Validation age failed');
+      expect(errors).to.have.nested.property('_errors.age').with.length(1);
     });
   });
 
@@ -60,15 +60,15 @@ describe('Errors', function() {
       let errors1 = (new Errors).add('hobbies', 'is required').add('name', 'is too long');
       let errors2 = errors.concat(errors1);
 
-      expect(errors2).to.have.deep.property('_errors.name').to.deep.eq(['can\'t be empty', 'is too long']);
-      expect(errors2).to.have.deep.property('_errors.age').to.deep.eq(['can\'t be less than 0']);
-      expect(errors2).to.have.deep.property('_errors.hobbies').to.deep.eq(['is required']);
+      expect(errors2).to.have.nested.property('_errors.name').to.deep.eq(['can\'t be empty', 'is too long']);
+      expect(errors2).to.have.nested.property('_errors.age').to.deep.eq(['can\'t be less than 0']);
+      expect(errors2).to.have.nested.property('_errors.hobbies').to.deep.eq(['is required']);
 
-      expect(errors1).to.have.deep.property('_errors.name').to.not.deep.eq(['can\'t be empty', 'is too long']);
-      expect(errors1).to.not.have.deep.property('_errors.age');
+      expect(errors1).to.have.nested.property('_errors.name').to.not.deep.eq(['can\'t be empty', 'is too long']);
+      expect(errors1).to.not.have.nested.property('_errors.age');
 
-      expect(errors).to.have.deep.property('_errors.name').to.not.deep.eq(['can\'t be empty', 'is too long']);
-      expect(errors).to.not.have.deep.property('_errors.hobbies');
+      expect(errors).to.have.nested.property('_errors.name').to.not.deep.eq(['can\'t be empty', 'is too long']);
+      expect(errors).to.not.have.nested.property('_errors.hobbies');
     });
   });
 

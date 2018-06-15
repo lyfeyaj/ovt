@@ -20,9 +20,8 @@ describe('NumberType', function() {
       expect(schema.convert(null)).to.eq(0);
       expect(schema.convert(true)).to.eq(1);
       expect(schema.convert(false)).to.eq(0);
-      expect(schema.convert({})).to.be.nan;
-      expect(schema.convert([1])).to.be.nan;
-      expect(schema.convert(undefined)).to.be.nan;
+      expect(schema.convert({})).to.be.NaN;
+      expect(schema.convert(undefined)).to.be.NaN;
     });
   });
 
