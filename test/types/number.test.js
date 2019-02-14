@@ -32,7 +32,7 @@ describe('NumberType', function() {
         [0, true],
         [-1, true],
         [1.5, true],
-        [NaN, true],
+        [NaN, false],
         [new Number(), true]
       ], { convert: false });
     });
