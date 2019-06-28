@@ -1,6 +1,6 @@
 {
   "name": "ovt",
-  "version": "1.1.15",
+  "version": "1.1.16",
   "description": "object validation tool",
   "main": "index.js",
   "scripts": {
@@ -32,7 +32,7 @@
     "babelify": "^10.0.0",
     "benchmark": "^2.1.4",
     "chai": "^4.2.0",
-    "mocha": "^5.2.0",
+    "mocha": "^6.1.4",
     "uglifyjs": "^2.4.11"
   }
 }
