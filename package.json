@@ -1,17 +1,18 @@
 {
   "name": "ovt",
-  "version": "1.1.16",
-  "description": "object validation tool",
+  "version": "1.1.17",
+  "description": "javascript object validation tool",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --recursive --reporter nyan",
-    "build": "browserify ./browserify.js --insert-global-vars=__filename,__dirname,process,global -t [ babelify --presets [ es2015 ] ] -o dist/ovt.js && uglifyjs dist/ovt.js -c -m -o dist/ovt.min.js"
+    "test": "mocha --recursive --reporter nyan"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lyfeyaj/ovt.git"
   },
   "keywords": [
+    "javascript",
+    "object",
     "validation",
     "tool"
   ],
@@ -27,12 +28,8 @@
     "magico": "^1.1.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babelify": "^10.0.0",
     "benchmark": "^2.1.4",
     "chai": "^4.2.0",
-    "mocha": "^6.1.4",
-    "uglifyjs": "^2.4.11"
+    "mocha": "^6.2.2"
   }
 }
