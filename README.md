@@ -3,7 +3,7 @@ Ovt
 
 [![Build Status](https://travis-ci.org/lyfeyaj/ovt.svg?branch=master)](https://travis-ci.org/lyfeyaj/ovt)
 
-Object schema description language and validator for JavaScript objects.
+Object schema description language and validator for JavaScript.
 
 # Introduction
 
@@ -14,9 +14,9 @@ This is ovt, ovt allows you to create *blueprints* or *schemas* for JavaScript o
 # Example
 
 ```javascript
-var ovt = require('ovt');
+const ovt = require('ovt');
 
-var schema = ovt.object().keys({
+const schema = ovt.object().keys({
     username: ovt.string().isLength(3, 30).required(),
     password: ovt.string().matches(/^[a-zA-Z0-9]{3,30}$/),
     access_token: ovt.array().items(ovt.string(), ovt.number()),
