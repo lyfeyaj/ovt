@@ -1,4 +1,4 @@
-Ovt
+Ovt (Object validation tool)
 ===
 
 [![Build Status](https://travis-ci.org/lyfeyaj/ovt.svg?branch=master)](https://travis-ci.org/lyfeyaj/ovt)
