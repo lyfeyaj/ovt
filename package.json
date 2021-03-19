@@ -23,13 +23,13 @@
   },
   "homepage": "https://github.com/lyfeyaj/ovt#readme",
   "dependencies": {
-    "baiji-i18n": "^1.1.0",
+    "baiji-i18n": "^1.1.1",
     "lodash.isequal": "^4.5.0",
-    "magico": "^1.1.1"
+    "magico": "^1.1.2"
   },
   "devDependencies": {
     "benchmark": "^2.1.4",
-    "chai": "^4.2.0",
-    "mocha": "^6.2.2"
+    "chai": "^4.3.4",
+    "mocha": "^8.3.2"
   }
 }
